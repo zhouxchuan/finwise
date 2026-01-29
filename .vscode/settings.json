@@ -1,4 +1,4 @@
 {
-    "qtForPython.designer.path": ""
-
+    "editor.contextmenu": true,
+    "task.autoDetect": "off"
 }
