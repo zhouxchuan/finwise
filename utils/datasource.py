@@ -5,14 +5,15 @@ import pandas as pd
 import akshare as ak
 from akshare.utils import demjson
 from io import StringIO
-
+import py_mini_racer
+import math
+from akshare.utils.tqdm import get_tqdm
 # TS_TOKEN = '31e5536e4d0ffbfb47a74e9832fd35c711fdaa2405bec6559b62d22d'
 
 
 class DataSource:
     def __init__(self, name=__name__):
         self.__name = name
-        # self.pro=ts.pro_api(TS_TOKEN)
 
         # 创建会话以复用连接
         self.session = requests.Session()
@@ -57,45 +58,250 @@ class DataSource:
         except:
             return None
 
-    # 获取指定基金基本信息
     def getFundBasic(self, code):
+        '''
+        获取指定基金的基本信息
+        ak.fund_individual_basic_info_xq
+        :param code: Description
+        '''
+        url = f"https://danjuanfunds.com/djapi/fund/{code}"
         try:
-            df = ak.fund_individual_basic_info_xq(symbol=code)
-            return df
-        except:
+            with self.session.get(url, timeout=10) as response:
+                response.encoding = 'utf-8'
+                text = response.text
+                json_data = text.json()["data"]
+
+            temp_df = pd.json_normalize(json_data)
+            temp_df.rename(
+                columns={
+                    "fd_code": "基金代码",
+                    "fd_name": "基金名称",
+                    "fd_full_name": "基金全称",
+                    "found_date": "成立时间",
+                    "totshare": "最新规模",
+                    "keeper_name": "基金公司",
+                    "manager_name": "基金经理",
+                    "trup_name": "托管银行",
+                    "type_desc": "基金类型",
+                    "rating_source": "评级机构",
+                    "rating_desc": "基金评级",
+                    "invest_orientation": "投资策略",
+                    "invest_target": "投资目标",
+                    "performance_bench_mark": "业绩比较基准",
+                },
+                inplace=True,
+            )
+            if "评级机构" not in temp_df.columns:
+                temp_df["评级机构"] = pd.NA
+            temp_df = temp_df[
+                [
+                    "基金代码",
+                    "基金名称",
+                    "基金全称",
+                    "成立时间",
+                    "最新规模",
+                    "基金公司",
+                    "基金经理",
+                    "托管银行",
+                    "基金类型",
+                    "评级机构",
+                    "基金评级",
+                    "投资策略",
+                    "投资目标",
+                    "业绩比较基准",
+                ]
+            ]
+            temp_df = temp_df.T.reset_index()
+            temp_df.columns = ["item", "value"]
+            return temp_df
+        except requests.RequestException as e:
+            print(f"getFundBasic: {e}")
             return None
 
-    # 获取指定基金的单位净值走势
     def getFundAssetNetValues(self, code):
+        '''
+        获取指定基金的单位净值走势
+        ak.fund_open_fund_info_em
+        :param code: Description
+        '''
+        url = f"https://fund.eastmoney.com/pingzhongdata/{code}.js"
+
         try:
-            df = ak.fund_open_fund_info_em(symbol=code, indicator='单位净值走势')
-            return df
-        except:
+            with self.session.get(url, timeout=10) as response:
+                response.encoding = 'utf-8'
+                data_text = response.text
+
+            js_code = py_mini_racer.MiniRacer()
+            js_code.eval(data_text)
+
+            # 单位净值走势
+            data_json = js_code.execute("Data_netWorthTrend")
+            temp_df = pd.DataFrame(data_json)
+            if temp_df.empty:
+                return pd.DataFrame()
+
+            temp_df["x"] = pd.to_datetime(temp_df["x"], unit="ms", utc=True).dt.tz_convert(
+                "Asia/Shanghai"
+            )
+            temp_df["x"] = temp_df["x"].dt.date
+            temp_df.columns = [
+                "净值日期",
+                "单位净值",
+                "日增长率",
+                "_",
+            ]
+            temp_df = temp_df[
+                [
+                    "净值日期",
+                    "单位净值",
+                    "日增长率",
+                ]
+            ]
+            temp_df["净值日期"] = pd.to_datetime(
+                temp_df["净值日期"], errors="coerce"
+            ).dt.date
+            temp_df["单位净值"] = pd.to_numeric(temp_df["单位净值"], errors="coerce")
+            temp_df["日增长率"] = pd.to_numeric(temp_df["日增长率"], errors="coerce")
+            return temp_df
+        except requests.RequestException as e:
+            print(f"getFundAssetNetValues: {e}")
             return None
 
-    # 获取指定基金的累计净值走势
     def getFundCumulativeNetValues(self, code):
+        '''
+        获取指定基金的累计净值走势
+        ak.fund_open_fund_info_em
+        :param code: Description
+        '''
+        url = f"https://fund.eastmoney.com/pingzhongdata/{code}.js"
+
         try:
-            df = ak.fund_open_fund_info_em(symbol=code, indicator='累计净值走势')
-            return df
-        except:
+            with self.session.get(url, timeout=10) as response:
+                response.encoding = 'utf-8'
+                data_text = response.text
+
+            js_code = py_mini_racer.MiniRacer()
+            js_code.eval(data_text)
+
+            data_json = js_code.execute("Data_ACWorthTrend")
+            temp_df = pd.DataFrame(data_json)
+            if temp_df.empty:
+                return pd.DataFrame()
+            temp_df.columns = ["x", "y"]
+            temp_df["x"] = pd.to_datetime(temp_df["x"], unit="ms", utc=True).dt.tz_convert(
+                "Asia/Shanghai"
+            )
+            temp_df["x"] = temp_df["x"].dt.date
+            temp_df.columns = [
+                "净值日期",
+                "累计净值",
+            ]
+            temp_df = temp_df[
+                [
+                    "净值日期",
+                    "累计净值",
+                ]
+            ]
+            temp_df["净值日期"] = pd.to_datetime(
+                temp_df["净值日期"], errors="coerce"
+            ).dt.date
+            temp_df["累计净值"] = pd.to_numeric(temp_df["累计净值"], errors="coerce")
+            return temp_df
+        except requests.RequestException as e:
+            print(f"getFundCumulativeNetValues: {e}")
             return None
 
-    # 获取指定基金的累计收益率走势
-    # period :  {"1月", "3月", "6月", "1年", "3年", "5年", "今年来", "成立来"}
     def getFundCumulativeReturnTrend(self, code, period='成立来'):
+        '''
+        获取指定基金的累计收益率走势
+        ak.fund_open_fund_info_em
+
+        :param code: Description
+        :param period: {"1月", "3月", "6月", "1年", "3年", "5年", "今年来", "成立来"}
+        '''
+
+        url = "https://api.fund.eastmoney.com/pinzhong/LJSYLZS"
+        period_map = {
+            "1月": "m",
+            "3月": "q",
+            "6月": "hy",
+            "1年": "y",
+            "3年": "try",
+            "5年": "fiy",
+            "今年来": "sy",
+            "成立来": "se",
+        }
+        params = {
+            "fundCode": code,
+            "indexcode": "000300",
+            "type": period_map[period],
+        }
+
         try:
-            df = ak.fund_open_fund_info_em(symbol=code, indicator='累计收益率走势', period=period)
-            return df
-        except:
+            with self.session.get(url, params=params, headers={"Referer": "https://fund.eastmoney.com/"}, timeout=10) as response:
+                response.encoding = 'utf-8'
+                data_json = response.json()
+
+            temp_df = pd.DataFrame(data_json["Data"][0]["data"])
+            temp_df.columns = ["日期", "累计收益率"]
+            temp_df["日期"] = pd.to_datetime(
+                temp_df["日期"], unit="ms", utc=True).dt.tz_convert("Asia/Shanghai")
+            temp_df["日期"] = pd.to_datetime(temp_df["日期"], errors="coerce").dt.date
+            temp_df["累计收益率"] = pd.to_numeric(temp_df["累计收益率"], errors="coerce")
+            return temp_df
+        except requests.RequestException as e:
+            print(f"getFundCumulativeReturnTrend: {e}")
             return None
 
     # 获取指定基金的同类排名走势
+
     def getFundRankingTrend(self, code):
+        '''
+        获取指定基金的同类排名走势
+        ak.fund_open_fund_info_em
+        :param code: Description
+        '''
+
+        url = f"https://fund.eastmoney.com/pingzhongdata/{code}.js"
+
         try:
-            df = ak.fund_open_fund_info_em(symbol=code, indicator='同类排名走势')
-            return df
-        except:
+            with self.session.get(url, timeout=10) as response:
+                response.encoding = 'utf-8'
+                data_text = response.text()
+
+            js_code = py_mini_racer.MiniRacer()
+            js_code.eval(data_text)
+
+            data_json = js_code.execute("Data_rateInSimilarType")
+            temp_df = pd.DataFrame(data_json)
+            temp_df["x"] = pd.to_datetime(temp_df["x"], unit="ms", utc=True).dt.tz_convert(
+                "Asia/Shanghai"
+            )
+            temp_df["x"] = temp_df["x"].dt.date
+            temp_df.columns = [
+                "报告日期",
+                "同类型排名-每日近三月排名",
+                "总排名-每日近三月排名",
+            ]
+            temp_df = temp_df[
+                [
+                    "报告日期",
+                    "同类型排名-每日近三月排名",
+                    "总排名-每日近三月排名",
+                ]
+            ]
+            temp_df["报告日期"] = pd.to_datetime(
+                temp_df["报告日期"], errors="coerce"
+            ).dt.date
+            temp_df["同类型排名-每日近三月排名"] = pd.to_numeric(
+                temp_df["同类型排名-每日近三月排名"], errors="coerce"
+            )
+            temp_df["总排名-每日近三月排名"] = pd.to_numeric(
+                temp_df["总排名-每日近三月排名"], errors="coerce"
+            )
+            return temp_df
+        except requests.RequestException as e:
+            print(f"getFundRankingTrend: {e}")
             return None
 
     def getFundHoldRatio(self, code, date='20251231'):
@@ -359,10 +565,77 @@ class DataSource:
             return None
 
     def getAnalyzeIndexData(self, symbol='市场表征', start_date='20251231', end_date='20251231'):
+        '''
+        获取指定时间范围内的指数分析数据
+        ak.index_analysis_daily_sw
+
+        :param self: Description
+        :param symbol: Description
+        :param start_date: Description
+        :param end_date: Description
+        '''
+        url = "https://www.swsresearch.com/institute-sw/api/index_analysis/index_analysis_report/"
+        params = {
+            "page": "1",
+            "page_size": "50",
+            "index_type": symbol,
+            "start_date": "-".join([start_date[:4], start_date[4:6], start_date[6:]]),
+            "end_date": "-".join([end_date[:4], end_date[4:6], end_date[6:]]),
+            "type": "DAY",
+            "swindexcode": "all",
+        }
+
         try:
-            df = ak.index_analysis_daily_sw(symbol=symbol, start_date=start_date, end_date=end_date)
-            return df
-        except:
+            with self.session.get(url, params=params, verify=False) as response:
+                response.raise_for_status()
+                data_json = response.json()
+
+            total_num = data_json["data"]["count"]
+            total_page = math.ceil(total_num / 50)
+            big_df = pd.DataFrame()
+            tqdm = get_tqdm()
+            for page in tqdm(range(1, total_page + 1), leave=False):
+                params.update({"page": page})
+                with self.session.get(url, params=params, verify=False) as response:
+                    response.raise_for_status()
+                    data_json = response.json()
+                temp_df = pd.DataFrame(data_json["data"]["results"])
+                big_df = pd.concat(objs=[big_df, temp_df], ignore_index=True)
+            big_df.rename(
+                columns={
+                    "swindexcode": "指数代码",
+                    "swindexname": "指数名称",
+                    "bargaindate": "发布日期",
+                    "closeindex": "收盘指数",
+                    "bargainamount": "成交量",
+                    "markup": "涨跌幅",
+                    "turnoverrate": "换手率",
+                    "pe": "市盈率",
+                    "pb": "市净率",
+                    "meanprice": "均价",
+                    "bargainsumrate": "成交额占比",
+                    "negotiablessharesum1": "流通市值",
+                    "negotiablessharesum2": "平均流通市值",
+                    "dp": "股息率",
+                },
+                inplace=True,
+            )
+            big_df["发布日期"] = pd.to_datetime(big_df["发布日期"], errors="coerce").dt.date
+            big_df["收盘指数"] = pd.to_numeric(big_df["收盘指数"], errors="coerce")
+            big_df["成交量"] = pd.to_numeric(big_df["成交量"], errors="coerce")
+            big_df["涨跌幅"] = pd.to_numeric(big_df["涨跌幅"], errors="coerce")
+            big_df["换手率"] = pd.to_numeric(big_df["换手率"], errors="coerce")
+            big_df["市盈率"] = pd.to_numeric(big_df["市盈率"], errors="coerce")
+            big_df["市净率"] = pd.to_numeric(big_df["市净率"], errors="coerce")
+            big_df["均价"] = pd.to_numeric(big_df["均价"], errors="coerce")
+            big_df["成交额占比"] = pd.to_numeric(big_df["成交额占比"], errors="coerce")
+            big_df["流通市值"] = pd.to_numeric(big_df["流通市值"], errors="coerce")
+            big_df["平均流通市值"] = pd.to_numeric(big_df["平均流通市值"], errors="coerce")
+            big_df["股息率"] = pd.to_numeric(big_df["股息率"], errors="coerce")
+            big_df.sort_values(by=["发布日期"], inplace=True, ignore_index=True)
+            return big_df
+        except requests.RequestException as e:
+            print(f"getAnalyzeIndexData: {e}")
             return None
 
 
