@@ -1,4 +1,4 @@
 {
-    "editor.contextmenu": true,
-    "task.autoDetect": "off"
+    "task.autoDetect": "off",
+    "editor.formatOnSave": true
 }

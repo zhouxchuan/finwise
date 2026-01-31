@@ -9,12 +9,14 @@ from TradeFundDialog import TradeFundDialog
 from SyncDialog import SyncDialog
 from FundsDialog import FundsDialog
 from AnalyzeIndexDialog import AnalyzeIndexDialog
+from AboutDialog import AboutDialog
 
 from utils.mysqldb import MySQLDB
 from utils.datasource import fundDataSource
 
 from datetime import datetime
 from classes.KChartView import KChartView
+from dateutil.relativedelta import relativedelta
 
 # -----------------------------------------------------------------------------
 # 主窗口类
@@ -58,7 +60,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.fundBasicTableWidget.setWordWrap(True)
 
         self.itemData = None
-        self.fundHoldThread = None
+        self.fundHoldThread = FundHoldThread()
+        self.fundHoldThread.fundHoldDataEvent.connect(self.onFundHoldDataEvent)
 
         self.fund_name_label.setStyleSheet(
             "font-size: 16px; font-weight: bold;")
@@ -135,7 +138,6 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         cnv_layout.addWidget(self.cnv_chartview)
 
     def initHoldChart(self):
-
         # -------------------- holdRadio --------------------
 
         # 创建图表
@@ -247,8 +249,6 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
     # 加载基金净值数据
     def loadFundNetValueData(self, code, period=6):
-        from dateutil.relativedelta import relativedelta
-
         latest_net_value = MySQLDB.getFundLatestNetValue(code)
         if latest_net_value:
             self.anv_value_label.setText(
@@ -418,20 +418,12 @@ class MainWindow(QMainWindow, Ui_mainWindow):
     # 加载基金持仓数据
     def loadFundHold(self, code):
         # 确保之前的线程已正确停止
-        if self.fundHoldThread is not None:
-            self.fundHoldThread.signal.disconnect()
-            self.fundHoldThread.stop()
-            self.fundHoldThread = None
-
-        # 创建新线程并启动
-        self.fundHoldThread = FundHoldThread(code)
-        self.fundHoldThread.signal.connect(
-            self.onFundHoldData, Qt.QueuedConnection)
+        self.fundHoldThread.stop()
+        self.fundHoldThread.setParams(code)
         self.fundHoldThread.start()
 
     # 槽函数(处理基金持仓数据信号)
-    def onFundHoldData(self, code, hold_ratio, hold_share, hold_bond, hold_industry):
-
+    def onFundHoldDataEvent(self, code, hold_ratio, hold_share, hold_bond, hold_industry):
         # ----------------- holdRatio --------------------
         self.holdRatioChart.removeAllSeries()
         if hold_ratio is not None:
@@ -554,9 +546,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
     # 窗口关闭事件
     def closeEvent(self, event):
         if QMessageBox.question(self, '提示', "是否确定退出应用程序?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No) == QMessageBox.Yes:
-            if self.fundHoldThread is not None:
-                self.fundHoldThread.stop()
-                self.fundHoldThread = None
+            self.fundHoldThread.stop()
             event.accept()
         else:
             event.ignore()
@@ -600,6 +590,10 @@ class MainWindow(QMainWindow, Ui_mainWindow):
     def onActionSyncTriggered(self):
         syncDialog = SyncDialog()
         syncDialog.exec()
+
+    def onActionAboutTriggered(self):
+        aboutDialog = AboutDialog()
+        aboutDialog.exec()
 
     # 基金列表项点击事件
     def onCurrentRowChanged(self, currentRow):
@@ -693,40 +687,29 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
 class FundHoldThread(QThread):
     # 正确的信号定义应该在类级别
-    signal = Signal(str, object, object, object, object)
+    fundHoldDataEvent = Signal(str, object, object, object, object)
 
-    def __init__(self, code):
+    def __init__(self):
         super().__init__()
+        self.code = None
+
+    def setParams(self, code):
         self.code = code
-        self.isWorking = True
-        self._mutex = QMutex()  # 添加互斥锁
+
+    def stop(self):
+        if self.isRunning():
+            self.quit()
+            self.wait(1000)
+            if self.isRunning():
+                self.terminate()
+                self.wait()
 
     def run(self):
         try:
-            if not self.isWorking:
-                return
-
             hold_ratio = fundDataSource.getFundHoldRatio(self.code)
             hold_share = fundDataSource.getFundHoldShare(self.code)
             hold_bond = fundDataSource.getFundHoldBond(self.code)
             hold_industry = fundDataSource.getFundHoldIndustry(self.code)
-            if not self.isWorking:
-                return
-
-            self.signal.emit(self.code, hold_ratio, hold_share,
-                             hold_bond, hold_industry)
+            self.fundHoldDataEvent.emit(self.code, hold_ratio, hold_share, hold_bond, hold_industry)
         except Exception as e:
             print(f'获取基金持仓数据失败：{e}')
-        finally:
-            self.isWorking = False
-
-    def stop(self):
-        self._mutex.lock()  # 加锁
-        self.isWorking = False
-        self._mutex.unlock()
-
-        if self.isRunning():
-            self.quit()
-            if not self.wait(1000):
-                self.terminate()
-                self.wait(500)

@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'MainWindow.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.9.0
+## Created by: Qt User Interface Compiler version 6.10.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -431,6 +431,7 @@ class Ui_mainWindow(object):
         self.periodRadioButton1.clicked.connect(mainWindow.onFundNetValuePeriodChanged)
         self.actionAnalyzeIndex.triggered.connect(mainWindow.onActionAnalyzeIndexTriggered)
         self.actionTradeFund.triggered.connect(mainWindow.onActionTradeFundTriggered)
+        self.actionAbout.triggered.connect(mainWindow.onActionAboutTriggered)
 
         self.fundTabWidget.setCurrentIndex(0)
 

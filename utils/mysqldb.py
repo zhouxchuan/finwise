@@ -175,26 +175,33 @@ class MySQLDatabase:
         return result
 
     def setFundHistoryAssetNetValues(self, code, row):
+        trade_date = row['净值日期'].strftime('%Y-%m-%d')
+        asset_net_value = row['单位净值'] if pd.notna(row['单位净值']) else 0.0
+        growth_rate = row['日增长率'] if pd.notna(row['日增长率']) else 0.0
+
         sql = "SELECT `trade_date` FROM `fund_history` WHERE `code` = %s AND `trade_date` = %s"
-        params = (code, row['净值日期'])
+        params = (code, trade_date)
         result = self.execute_query(sql, params=params)
-        if result:
-            return
+        if result is not None and len(result) > 0:
+            return 0
 
         sql = "INSERT INTO fund_history (`code`, `trade_date`, `asset_net_value`,`growth_rate`) VALUES (%s, %s, %s, %s)"
-        params = (code, row['净值日期'], row['单位净值'], row['日增长率'])
+        params = (code, trade_date, asset_net_value, growth_rate)
         rowcount = self.execute_update(sql, params=params)
         return rowcount
 
     def setFundHistoryCumNetValues(self, code, row):
+        trade_date = row['净值日期'].strftime('%Y-%m-%d')
+        cum_net_value = row['累计净值'] if pd.notna(row['累计净值']) else 0.0
+
         sql = "SELECT `trade_date` FROM `fund_history` WHERE `code` = %s AND `trade_date` = %s"
-        params = (code, row['净值日期'])
+        params = (code, trade_date)
         result = self.execute_query(sql, params=params)
-        if result:
+        if result is None or len(result) == 0:
             return 0
 
         sql = "UPDATE `fund_history` set `cum_net_value`=%s WHERE `code`=%s AND `trade_date`=%s"
-        params = (row['累计净值'], code, row['净值日期'])
+        params = (cum_net_value, code, trade_date)
         rowcount = self.execute_update(sql, params=params)
         return rowcount
 
