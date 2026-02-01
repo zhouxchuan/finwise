@@ -7,6 +7,6 @@ class AboutDialog(QDialog, Ui_AboutDialog):
     关于对话框类
     '''
 
-    def __init__(self):
-        super(AboutDialog, self).__init__()
+    def __init__(self, parent=None):
+        super(AboutDialog, self).__init__(parent)
         self.setupUi(self)

@@ -9,8 +9,8 @@ from datetime import datetime
 
 # 分析指数对话框
 class AnalyzeIndexDialog(QDialog, Ui_AnalyzeIndexDialog):
-    def __init__(self):
-        super(AnalyzeIndexDialog, self).__init__()
+    def __init__(self, parent=None):
+        super(AnalyzeIndexDialog, self).__init__(parent)
         self.setupUi(self)
 
         self.symbolComboBox.addItems(['市场表征', '一级行业', '风格指数'])

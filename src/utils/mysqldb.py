@@ -136,29 +136,24 @@ class MySQLDatabase:
         result = self.execute_query(sql, params=params)
         return result[0] if result else None
 
-    def setFundBasicData(self, row):
-        code = row['code']
-        name = row['name'] if pd.notna(row['name']) else ''
-        fullname = row['fullname'] if pd.notna(row['fullname']) else ''
-        found_date = row['found_date'] if pd.notna(
-            row['found_date']) else ''
-        scale = row['scale'] if pd.notna(row['scale']) else ''
-        company = row['company'] if pd.notna(row['company']) else ''
-        manager = row['manager'] if pd.notna(row['manager']) else ''
-        bank = row['bank'] if pd.notna(row['bank']) else ''
-        type = row['type'] if pd.notna(row['type']) else ''
-        agency = row['agency'] if pd.notna(row['agency']) else ''
-        rating = row['rating'] if pd.notna(row['rating']) else ''
-        investment_strategy = row['investment_strategy'] if pd.notna(
-            row['investment_strategy']) else ''
-        investment_goal = row['investment_goal'] if pd.notna(
-            row['investment_goal']) else ''
-        benchmark = row['benchmark'] if pd.notna(
-            row['benchmark']) else ''
+    def setFundBasicData(self, data):
+        code = data['基金代码']
+        name = data['基金名称']
+        fullname = data['基金全称']
+        found_date = data['成立时间']
+        scale = data['最新规模']
+        company = data['基金公司']
+        manager = data['基金经理']
+        bank = data['托管银行']
+        type = data['基金类型']
+        rating = data['基金评级']
+        investment_strategy = data['投资策略']
+        investment_goal = data['投资目标']
+        benchmark = data['业绩比较基准']
 
-        sql = "REPLACE INTO fund_basic (`code`, `name`, `fullname`,`found_date`,`scale`,`company`,`manager`,`bank`,`type`,`agency`,`rating`,`investment_strategy`,`investment_goal`,`benchmark`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        sql = "REPLACE INTO fund_basic (`code`, `name`, `fullname`,`found_date`,`scale`,`company`,`manager`,`bank`,`type`,`rating`,`investment_strategy`,`investment_goal`,`benchmark`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
         params = (code, name, fullname, found_date, scale, company, manager, bank,
-                  type, agency, rating, investment_strategy, investment_goal, benchmark,)
+                  type, rating, investment_strategy, investment_goal, benchmark,)
         rowcount = self.execute_update(sql, params=params)
         return rowcount
 

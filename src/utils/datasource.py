@@ -1,13 +1,17 @@
+import re
+from unittest import result
 from bs4 import BeautifulSoup
 import requests
 # import tushare as ts
 import pandas as pd
 import akshare as ak
 from akshare.utils import demjson
+from akshare.utils.tqdm import get_tqdm
 from io import StringIO
 import py_mini_racer
 import math
-from akshare.utils.tqdm import get_tqdm
+import json
+
 # TS_TOKEN = '31e5536e4d0ffbfb47a74e9832fd35c711fdaa2405bec6559b62d22d'
 
 
@@ -36,7 +40,7 @@ class DataSource:
             soup = BeautifulSoup(html_content, 'html.parser')
 
             # 存储数据的列表
-            data = []
+            result = []
 
             # 找到所有包含name和code的td元素
             td_elements = soup.find('div', id='kfsFundNetWrap').find_all('td', class_='fund-name-code')
@@ -49,12 +53,9 @@ class DataSource:
                 # 确保标签存在，避免None报错
                 name = name_tag.text.strip() if name_tag else ''
                 code = code_tag.text.strip() if code_tag else ''
+                result.append({'name': name, 'code': code})
 
-                data.append({'name': name, 'code': code})
-
-            # 转换为DataFrame
-            df = pd.DataFrame(data)
-            return df
+            return result
         except:
             return None
 
@@ -69,51 +70,26 @@ class DataSource:
             with self.session.get(url, timeout=10) as response:
                 response.encoding = 'utf-8'
                 text = response.text
-                json_data = text.json()["data"]
+                json_data = json.loads(text)["data"]
 
-            temp_df = pd.json_normalize(json_data)
-            temp_df.rename(
-                columns={
-                    "fd_code": "基金代码",
-                    "fd_name": "基金名称",
-                    "fd_full_name": "基金全称",
-                    "found_date": "成立时间",
-                    "totshare": "最新规模",
-                    "keeper_name": "基金公司",
-                    "manager_name": "基金经理",
-                    "trup_name": "托管银行",
-                    "type_desc": "基金类型",
-                    "rating_source": "评级机构",
-                    "rating_desc": "基金评级",
-                    "invest_orientation": "投资策略",
-                    "invest_target": "投资目标",
-                    "performance_bench_mark": "业绩比较基准",
-                },
-                inplace=True,
-            )
-            if "评级机构" not in temp_df.columns:
-                temp_df["评级机构"] = pd.NA
-            temp_df = temp_df[
-                [
-                    "基金代码",
-                    "基金名称",
-                    "基金全称",
-                    "成立时间",
-                    "最新规模",
-                    "基金公司",
-                    "基金经理",
-                    "托管银行",
-                    "基金类型",
-                    "评级机构",
-                    "基金评级",
-                    "投资策略",
-                    "投资目标",
-                    "业绩比较基准",
-                ]
-            ]
-            temp_df = temp_df.T.reset_index()
-            temp_df.columns = ["item", "value"]
-            return temp_df
+            if json_data is None:
+                return None
+
+            result = {}
+            result["基金代码"] = code
+            result["基金名称"] = json_data["fd_name"]
+            result["基金全称"] = json_data["fd_full_name"]
+            result["成立时间"] = json_data["found_date"]
+            result["最新规模"] = json_data["totshare"]
+            result["基金公司"] = json_data["keeper_name"]
+            result["基金经理"] = json_data["manager_name"]
+            result["托管银行"] = json_data["trup_name"]
+            result["基金类型"] = json_data["type_desc"]
+            result["基金评级"] = json_data["rating_desc"]
+            result["投资策略"] = json_data["invest_orientation"]
+            result["投资目标"] = json_data["invest_target"]
+            result["业绩比较基准"] = json_data["performance_bench_mark"]
+            return result
         except requests.RequestException as e:
             print(f"getFundBasic: {e}")
             return None
@@ -252,8 +228,6 @@ class DataSource:
         except requests.RequestException as e:
             print(f"getFundCumulativeReturnTrend: {e}")
             return None
-
-    # 获取指定基金的同类排名走势
 
     def getFundRankingTrend(self, code):
         '''

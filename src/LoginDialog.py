@@ -3,8 +3,8 @@ from ui.LoginDialog_ui import Ui_loginDialog
 from utils.mysqldb import MySQLDB
 
 class LoginDialog(QDialog, Ui_loginDialog):
-    def __init__(self):
-        super(LoginDialog, self).__init__()
+    def __init__(self, parent=None):
+        super(LoginDialog, self).__init__(parent)
         self.setupUi(self)
         self.userid = ''
         self.password = ''

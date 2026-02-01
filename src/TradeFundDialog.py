@@ -6,10 +6,13 @@ from utils.mysqldb import MySQLDB
 
 # -----------------------------------------------------------------------------
 class TradeFundDialog(QDialog, Ui_TradeFundDialog):
-    def __init__(self):
-        super(TradeFundDialog, self).__init__()
+    def __init__(self, parent=None):
+        super(TradeFundDialog, self).__init__(parent)
         self.setupUi(self)
-        self.setWindowFlags(self.windowFlags() & Qt.WindowMaximizeButtonHint)
+        # self.setWindowFlags(self.windowFlags() & Qt.WindowMaximizeButtonHint)
+
+        self.get_code_by_order = {}
+        self.get_order_by_code = {}
 
         self.startDateEdit.setDate(QDate.currentDate().addDays(-15))
         self.endDateEdit.setDate(QDate.currentDate())
@@ -20,8 +23,8 @@ class TradeFundDialog(QDialog, Ui_TradeFundDialog):
     def onShowButtonClicked(self):
         self.tableWidget.clearContents()
 
-        self.get_code_by_order = {}
-        self.get_order_by_code = {}
+        self.get_code_by_order.clear()
+        self.get_order_by_code.clear()
 
         fund_ist = MySQLDB.getFundList()
         self.tableWidget.setColumnCount(len(fund_ist))
