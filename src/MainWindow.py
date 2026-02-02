@@ -1,7 +1,8 @@
-from PySide6.QtWidgets import QMainWindow, QDialog, QMessageBox, QSplitter, QWidget, QSizePolicy, QListWidgetItem, QMenu
+from PySide6.QtWidgets import QMainWindow, QDialog, QMessageBox, QSplitter, QWidget, QSizePolicy, QListWidgetItem, QMenu, QTableWidgetItem, QHeaderView
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction
 
+from utils.mysqldb import MySQLDB
 from ui.MainWindow_ui import Ui_mainWindow
 from LoginDialog import LoginDialog
 from SetupDataDialog import SetupDataDialog
@@ -12,8 +13,6 @@ from AboutDialog import AboutDialog
 from FundBasicInfoDialog import FundBasicInfoDialog
 from FundNetValueDialog import FundNetValueDialog
 from FundHoldDataDialog import FundHoldDataDialog
-
-from utils.mysqldb import MySQLDB
 
 
 class MainWindow(QMainWindow, Ui_mainWindow):
@@ -42,14 +41,43 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.splitter.addWidget(self.rightWidget)
         self.setCentralWidget(self.splitter)
 
-        self.fundTabelLabel.setText('[未选择基金]')
+        self.fundNameLabel.setText('[未选择基金]')
 
+        self.fundListWidget.setEnabled(False)
         self.fundListWidget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.fundListWidget.customContextMenuRequested.connect(self.onFundListWidgetContextMenu)
         self.fundListWidgetContextMenu = QMenu(self)
         self.fundListWidgetContextMenu.addAction(QAction(u'基本信息', self, triggered=self.onActionFundBasicInfoTriggered))
         self.fundListWidgetContextMenu.addAction(QAction(u'净值数据', self, triggered=self.onActionFundNetValueTriggered))
         self.fundListWidgetContextMenu.addAction(QAction(u'基金持仓', self, triggered=self.onActionFundHoldDataTriggered))
+
+        self.fundTableWidget.setEnabled(False)
+        self.fundTableWidget.setColumnCount(4)
+        self.fundTableWidget.setHorizontalHeaderLabels(['日期', '操作', '数量', '标注'])
+        self.fundTableWidget.setRowCount(0)
+        self.fundTableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.fundTableWidget.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.fundTableWidget.customContextMenuRequested.connect(self.onFundTableWidgetContextMenu)
+        self.fundTableWidgetContextMenu = QMenu(self)
+        self.fundTableWidgetContextMenu.addAction(QAction(u'添加记录', self, triggered=self.onActionFundAddRecordTriggered))
+        self.fundTableWidgetContextMenu.addAction(QAction(u'修改记录', self, triggered=self.onActionFundModifyRecordTriggered))
+        self.fundTableWidgetContextMenu.addAction(QAction(u'删除记录', self, triggered=self.onActionFundDeleteRecordTriggered))
+
+    def loadFundList(self):
+        '''
+        加载基金列表
+        '''
+        fund_list = MySQLDB.getFundList()
+        if fund_list:
+            self.fundListWidget.clear()
+            for fund in fund_list:
+                item = QListWidgetItem(fund['code'] + ' ' + fund['name'])
+                item.setData(
+                    Qt.UserRole, {'code': fund['code'], 'name': fund['name']})
+                self.fundListWidget.addItem(item)
+            self.fundListWidget.setCurrentRow(0)
+        else:
+            self.statusBar.showMessage('没有获取到基金列表')
 
     def setActionStatus(self, isLoggedIn):
         '''
@@ -59,8 +87,8 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.actionLogin.setEnabled(not isLoggedIn)
         self.actionLogout.setEnabled(isLoggedIn)
         self.actionSync.setEnabled(isLoggedIn)
-        self.leftWidget.setEnabled(isLoggedIn)
-        self.rightWidget.setEnabled(isLoggedIn)
+        self.fundListWidget.setEnabled(isLoggedIn)
+        self.fundTableWidget.setEnabled(isLoggedIn)
 
         if isLoggedIn:
             self.statusBar.showMessage(f'{self.userid} 已登录', 3000)
@@ -69,7 +97,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             self.setWindowTitle('基金分析1.0 [未登录]')
             self.statusBar.showMessage('请先登录验证账户密码')
             self.fundListWidget.clear()
-            self.fundTabelLabel.setText('[未选择基金]')
+            self.fundNameLabel.setText('[未选择基金]')
             self.fundTableWidget.clearContents()
             self.fundTableWidget.setRowCount(0)
 
@@ -187,20 +215,143 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             return
         item_code = item_data['code']
         item_name = item_data['name']
-        self.fundTabelLabel.setText(f'[{item_code}] {item_name}')
+        self.statusBar.showMessage(f'已选择 [{item_code}] {item_name}')
+        self.showFundAccountData(item_code)
+        self.showFundActionData(item_code)
 
-    def loadFundList(self):
+    def showFundAccountData(self, code):
         '''
-        加载基金列表
+        显示基金详情
+        param: code: 基金代码
         '''
-        fund_list = MySQLDB.getFundList()
-        if fund_list:
-            self.fundListWidget.clear()
-            for fund in fund_list:
-                item = QListWidgetItem(fund['code'] + ' ' + fund['name'])
-                item.setData(
-                    Qt.UserRole, {'code': fund['code'], 'name': fund['name']})
-                self.fundListWidget.addItem(item)
-            self.fundListWidget.setCurrentRow(0)
+        # 显示基金持仓表
+        held_data = MySQLDB.getFundAccountData(code)
+        if held_data is None:
+            return
+
+        fund_name = held_data["name"]
+        held_cost = float(held_data["held_cost"])
+        held_shares = float(held_data["held_shares"])
+        self.fundNameLabel.setText(f'{fund_name} [{code}]')
+        self.fundHeldCostLabel.setText(f'{held_cost:,.2f}')
+        self.fundHeldSharesLabel.setText(f'{held_shares:,.2f}')
+
+        # 显示基金最新净值
+        nv_data = MySQLDB.getFundLatestNetValue(code)
+        if nv_data is None:
+            return
+        nv_date = nv_data["trade_date"]
+        nv_value = float(nv_data["asset_net_value"])
+        nv_growth = float(nv_data["growth_rate"])
+
+        self.fundNVDateLabel.setText(f'{nv_date}')
+        self.fundNetValueLabel.setText(f'{nv_value:,.4f}')
+        if nv_growth < 0:
+            self.fundADRatioLabel.setStyleSheet('font-size:20px; font-weight:bold; color: green;')
         else:
-            self.statusBar.showMessage('没有获取到基金列表')
+            self.fundADRatioLabel.setStyleSheet('font-size:20px; font-weight:bold; color: red;')
+        self.fundADRatioLabel.setText(f'{nv_growth:,.2f}%')
+
+        total_value = nv_value * held_shares
+        self.fundTotalLabel.setText(f'{total_value:,.2f}')
+
+        profit_value = total_value - held_cost
+        self.fundProfitLabel.setText(f'{profit_value:,.2f}')
+        if profit_value < 0:
+            self.fundProfitLabel.setStyleSheet('font-size:20px; font-weight:bold; color: green;')
+        else:
+            self.fundProfitLabel.setStyleSheet('font-size:20px; font-weight:bold; color: red;')
+
+        if held_cost == 0:
+            profit_ratio = 0
+        else:
+            profit_ratio = profit_value / held_cost
+        self.fundProfitRatioLabel.setText(f'{profit_ratio:,.2f}%')
+        if profit_ratio < 0:
+            self.fundProfitRatioLabel.setStyleSheet('font-size:20px; font-weight:bold; color: green;')
+        else:
+            self.fundProfitRatioLabel.setStyleSheet('font-size:20px; font-weight:bold; color: red;')
+
+    def showFundActionData(self, code):
+        self.fundTableWidget.clearContents()
+        self.fundTableWidget.setRowCount(0)
+        if code is None:
+            return
+        # 从数据库加载基金持仓数据
+        data = MySQLDB.getFundActionData(code)
+        self.fundTableWidget.setRowCount(len(data))
+        for row, item in enumerate(data):
+            for col, value in enumerate(item.values()):
+                if col == 1:
+                    if value == 0:
+                        value = '买入金额'
+                    elif value == 1:
+                        value = '卖出份额'
+                    else:
+                        value = '-'
+
+                if col == 3:
+                    if value == 0:
+                        value = '已执行'
+                    elif value == 1:
+                        value = '未执行'
+                    else:
+                        value = '-'
+                item = QTableWidgetItem(str(value))
+                item.setData(Qt.UserRole, item)
+                item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.fundTableWidget.setItem(row, col, item)
+
+    def onFundTableWidgetContextMenu(self, pos):
+        '''
+        基金持仓表项右键点击事件
+        param: pos: 右键点击位置
+        '''
+        item = self.fundTableWidget.itemAt(pos)
+        if item is None:
+            self.fundListWidgetContextMenu.actions()[0].setEnabled(True)
+            self.fundTableWidgetContextMenu.actions()[1].setEnabled(False)
+            self.fundTableWidgetContextMenu.actions()[2].setEnabled(False)
+        else:
+            self.fundListWidgetContextMenu.actions()[0].setEnabled(True)
+            self.fundTableWidgetContextMenu.actions()[1].setEnabled(True)
+            self.fundTableWidgetContextMenu.actions()[2].setEnabled(True)
+        self.fundTableWidgetContextMenu.exec(self.fundTableWidget.mapToGlobal(pos))
+
+    def onActionFundAddRecordTriggered(self):
+        '''
+        添加基金持仓记录ACTION事件
+        '''
+        item = self.fundTableWidget.currentItem()
+        if item is None:
+            return
+        item_data = item.data(Qt.UserRole)
+        if item_data is None:
+            return
+        dialog = FundAddRecordDialog(parent=self, params=item_data)
+        dialog.exec()
+
+    def onActionFundModifyRecordTriggered(self):
+        '''
+        Docstring for onActionFundModifyRecordTriggered
+
+        :param self: Description
+        '''
+        pass
+
+    def onActionFundDeleteRecordTriggered(self):
+        '''
+        删除基金持仓记录ACTION事件
+        '''
+        item = self.fundTableWidget.currentItem()
+        if item is None:
+            return
+        item_data = item.data(Qt.UserRole)
+        if item_data is None:
+            return
+        item_code = item_data['code']
+        item_date = item_data['date']
+        if QMessageBox.question(self, '提示', f"是否确定删除 [{item_code}] {item_date} 的持仓记录?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No) == QMessageBox.Yes:
+            MySQLDB.deleteFundHoldRecord(item_code, item_date)
+            self.loadFundHoldData()
+            self.statusBar.showMessage(f'已删除 [{item_code}] {item_date} 的持仓记录', 3000)

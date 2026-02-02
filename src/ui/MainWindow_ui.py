@@ -16,17 +16,17 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QAbstractItemView, QApplication, QFrame, QHeaderView,
-    QLabel, QListWidget, QListWidgetItem, QMainWindow,
-    QMenu, QMenuBar, QSizePolicy, QStatusBar,
-    QTableWidget, QTableWidgetItem, QToolBar, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QAbstractItemView, QApplication, QFrame, QGridLayout,
+    QHBoxLayout, QHeaderView, QLabel, QListWidget,
+    QListWidgetItem, QMainWindow, QMenu, QMenuBar,
+    QPushButton, QSizePolicy, QStatusBar, QTableWidget,
+    QTableWidgetItem, QToolBar, QVBoxLayout, QWidget)
 
 class Ui_mainWindow(object):
     def setupUi(self, mainWindow):
         if not mainWindow.objectName():
             mainWindow.setObjectName(u"mainWindow")
-        mainWindow.resize(1241, 810)
+        mainWindow.resize(1262, 810)
         mainWindow.setStyleSheet(u"QToolBar\n"
 "{\n"
 "	spacing:5px;\n"
@@ -124,22 +124,156 @@ class Ui_mainWindow(object):
 
         self.rightWidget = QWidget(self.centralWidget)
         self.rightWidget.setObjectName(u"rightWidget")
-        self.rightWidget.setGeometry(QRect(400, 30, 631, 471))
+        self.rightWidget.setGeometry(QRect(340, 20, 631, 481))
         self.verticalLayout_2 = QVBoxLayout(self.rightWidget)
-        self.verticalLayout_2.setSpacing(0)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.fundTabelLabel = QLabel(self.rightWidget)
-        self.fundTabelLabel.setObjectName(u"fundTabelLabel")
-        self.fundTabelLabel.setMinimumSize(QSize(0, 25))
-        self.fundTabelLabel.setFont(font)
-        self.fundTabelLabel.setStyleSheet(u"padding: 2px 10px;\n"
-"font-size: 14px;")
-        self.fundTabelLabel.setFrameShape(QFrame.Shape.StyledPanel)
-        self.fundTabelLabel.setFrameShadow(QFrame.Shadow.Sunken)
-        self.fundTabelLabel.setAlignment(Qt.AlignmentFlag.AlignLeading|Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
+        self.frame = QFrame(self.rightWidget)
+        self.frame.setObjectName(u"frame")
+        self.frame.setFrameShape(QFrame.Shape.StyledPanel)
+        self.frame.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout = QHBoxLayout(self.frame)
+        self.horizontalLayout.setSpacing(5)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.horizontalLayout.setContentsMargins(5, 0, 0, 0)
+        self.fundNameLabel = QLabel(self.frame)
+        self.fundNameLabel.setObjectName(u"fundNameLabel")
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.fundNameLabel.sizePolicy().hasHeightForWidth())
+        self.fundNameLabel.setSizePolicy(sizePolicy)
+        self.fundNameLabel.setMinimumSize(QSize(0, 25))
+        self.fundNameLabel.setFont(font)
+        self.fundNameLabel.setStyleSheet(u"font-size: 14px;")
+        self.fundNameLabel.setFrameShape(QFrame.Shape.StyledPanel)
+        self.fundNameLabel.setFrameShadow(QFrame.Shadow.Sunken)
+        self.fundNameLabel.setAlignment(Qt.AlignmentFlag.AlignLeading|Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignVCenter)
 
-        self.verticalLayout_2.addWidget(self.fundTabelLabel)
+        self.horizontalLayout.addWidget(self.fundNameLabel)
+
+        self.fundBasicInfoButton = QPushButton(self.frame)
+        self.fundBasicInfoButton.setObjectName(u"fundBasicInfoButton")
+        self.fundBasicInfoButton.setMinimumSize(QSize(0, 0))
+
+        self.horizontalLayout.addWidget(self.fundBasicInfoButton)
+
+        self.fundNetValueButton = QPushButton(self.frame)
+        self.fundNetValueButton.setObjectName(u"fundNetValueButton")
+        self.fundNetValueButton.setMinimumSize(QSize(0, 0))
+
+        self.horizontalLayout.addWidget(self.fundNetValueButton)
+
+        self.fundHoldDataButton = QPushButton(self.frame)
+        self.fundHoldDataButton.setObjectName(u"fundHoldDataButton")
+        self.fundHoldDataButton.setMinimumSize(QSize(0, 0))
+
+        self.horizontalLayout.addWidget(self.fundHoldDataButton)
+
+
+        self.verticalLayout_2.addWidget(self.frame)
+
+        self.fundDataFrame = QFrame(self.rightWidget)
+        self.fundDataFrame.setObjectName(u"fundDataFrame")
+        self.fundDataFrame.setFrameShape(QFrame.Shape.StyledPanel)
+        self.fundDataFrame.setFrameShadow(QFrame.Shadow.Raised)
+        self.gridLayout = QGridLayout(self.fundDataFrame)
+        self.gridLayout.setSpacing(10)
+        self.gridLayout.setObjectName(u"gridLayout")
+        self.gridLayout.setContentsMargins(20, 10, 5, 10)
+        self.label = QLabel(self.fundDataFrame)
+        self.label.setObjectName(u"label")
+
+        self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
+
+        self.label_4 = QLabel(self.fundDataFrame)
+        self.label_4.setObjectName(u"label_4")
+
+        self.gridLayout.addWidget(self.label_4, 0, 1, 1, 1)
+
+        self.label_5 = QLabel(self.fundDataFrame)
+        self.label_5.setObjectName(u"label_5")
+
+        self.gridLayout.addWidget(self.label_5, 0, 2, 1, 1)
+
+        self.label_13 = QLabel(self.fundDataFrame)
+        self.label_13.setObjectName(u"label_13")
+
+        self.gridLayout.addWidget(self.label_13, 0, 3, 1, 1)
+
+        self.fundTotalLabel = QLabel(self.fundDataFrame)
+        self.fundTotalLabel.setObjectName(u"fundTotalLabel")
+        self.fundTotalLabel.setStyleSheet(u"font-size: 20px; font-weight: bold;")
+
+        self.gridLayout.addWidget(self.fundTotalLabel, 1, 0, 1, 1)
+
+        self.fundProfitLabel = QLabel(self.fundDataFrame)
+        self.fundProfitLabel.setObjectName(u"fundProfitLabel")
+        self.fundProfitLabel.setStyleSheet(u"font-size: 20px; font-weight: bold;")
+
+        self.gridLayout.addWidget(self.fundProfitLabel, 1, 1, 1, 1)
+
+        self.fundProfitRatioLabel = QLabel(self.fundDataFrame)
+        self.fundProfitRatioLabel.setObjectName(u"fundProfitRatioLabel")
+        self.fundProfitRatioLabel.setStyleSheet(u"font-size: 20px; font-weight: bold;")
+
+        self.gridLayout.addWidget(self.fundProfitRatioLabel, 1, 2, 1, 1)
+
+        self.fundADRatioLabel = QLabel(self.fundDataFrame)
+        self.fundADRatioLabel.setObjectName(u"fundADRatioLabel")
+        self.fundADRatioLabel.setStyleSheet(u"font-size: 20px; font-weight: bold;")
+
+        self.gridLayout.addWidget(self.fundADRatioLabel, 1, 3, 1, 1)
+
+        self.label_8 = QLabel(self.fundDataFrame)
+        self.label_8.setObjectName(u"label_8")
+
+        self.gridLayout.addWidget(self.label_8, 2, 0, 1, 1)
+
+        self.label_10 = QLabel(self.fundDataFrame)
+        self.label_10.setObjectName(u"label_10")
+
+        self.gridLayout.addWidget(self.label_10, 2, 1, 1, 1)
+
+        self.label_12 = QLabel(self.fundDataFrame)
+        self.label_12.setObjectName(u"label_12")
+
+        self.gridLayout.addWidget(self.label_12, 2, 2, 1, 1)
+
+        self.label_15 = QLabel(self.fundDataFrame)
+        self.label_15.setObjectName(u"label_15")
+
+        self.gridLayout.addWidget(self.label_15, 2, 3, 1, 1)
+
+        self.fundHeldCostLabel = QLabel(self.fundDataFrame)
+        self.fundHeldCostLabel.setObjectName(u"fundHeldCostLabel")
+        self.fundHeldCostLabel.setStyleSheet(u"font-size: 14px;")
+
+        self.gridLayout.addWidget(self.fundHeldCostLabel, 3, 0, 1, 1)
+
+        self.fundHeldSharesLabel = QLabel(self.fundDataFrame)
+        self.fundHeldSharesLabel.setObjectName(u"fundHeldSharesLabel")
+        self.fundHeldSharesLabel.setStyleSheet(u"font-size: 14px;")
+
+        self.gridLayout.addWidget(self.fundHeldSharesLabel, 3, 1, 1, 1)
+
+        self.fundNetValueLabel = QLabel(self.fundDataFrame)
+        self.fundNetValueLabel.setObjectName(u"fundNetValueLabel")
+        self.fundNetValueLabel.setStyleSheet(u"font-size: 14px;")
+
+        self.gridLayout.addWidget(self.fundNetValueLabel, 3, 2, 1, 1)
+
+        self.fundNVDateLabel = QLabel(self.fundDataFrame)
+        self.fundNVDateLabel.setObjectName(u"fundNVDateLabel")
+        self.fundNVDateLabel.setStyleSheet(u"font-size: 14px;")
+
+        self.gridLayout.addWidget(self.fundNVDateLabel, 3, 3, 1, 1)
+
+        self.gridLayout.setColumnStretch(0, 2)
+        self.gridLayout.setColumnStretch(1, 2)
+        self.gridLayout.setColumnStretch(2, 1)
+        self.gridLayout.setColumnStretch(3, 1)
+
+        self.verticalLayout_2.addWidget(self.fundDataFrame)
 
         self.fundTableWidget = QTableWidget(self.rightWidget)
         if (self.fundTableWidget.columnCount() < 3):
@@ -154,13 +288,26 @@ class Ui_mainWindow(object):
         self.fundTableWidget.setGridStyle(Qt.PenStyle.DotLine)
         self.fundTableWidget.setRowCount(3)
         self.fundTableWidget.setColumnCount(3)
+        self.fundTableWidget.verticalHeader().setVisible(False)
 
         self.verticalLayout_2.addWidget(self.fundTableWidget)
+
+        self.frame_2 = QFrame(self.rightWidget)
+        self.frame_2.setObjectName(u"frame_2")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.frame_2.sizePolicy().hasHeightForWidth())
+        self.frame_2.setSizePolicy(sizePolicy1)
+        self.frame_2.setFrameShape(QFrame.Shape.StyledPanel)
+        self.frame_2.setFrameShadow(QFrame.Shadow.Raised)
+
+        self.verticalLayout_2.addWidget(self.frame_2)
 
         mainWindow.setCentralWidget(self.centralWidget)
         self.menuBar = QMenuBar(mainWindow)
         self.menuBar.setObjectName(u"menuBar")
-        self.menuBar.setGeometry(QRect(0, 0, 1241, 33))
+        self.menuBar.setGeometry(QRect(0, 0, 1262, 33))
         self.menuFile = QMenu(self.menuBar)
         self.menuFile.setObjectName(u"menuFile")
         self.menuHelp = QMenu(self.menuBar)
@@ -212,6 +359,9 @@ class Ui_mainWindow(object):
         self.actionTradeFund.triggered.connect(mainWindow.onActionTradeFundTriggered)
         self.actionAbout.triggered.connect(mainWindow.onActionAboutTriggered)
         self.fundListWidget.itemSelectionChanged.connect(mainWindow.onFundListWidgetItemSelectionChanged)
+        self.fundBasicInfoButton.clicked.connect(mainWindow.onActionFundBasicInfoTriggered)
+        self.fundNetValueButton.clicked.connect(mainWindow.onActionFundNetValueTriggered)
+        self.fundHoldDataButton.clicked.connect(mainWindow.onActionFundHoldDataTriggered)
 
         QMetaObject.connectSlotsByName(mainWindow)
     # setupUi
@@ -270,7 +420,26 @@ class Ui_mainWindow(object):
         self.actionTradeFund.setToolTip(QCoreApplication.translate("mainWindow", u"\u57fa\u91d1\u4ea4\u6613", None))
 #endif // QT_CONFIG(tooltip)
         self.fundListLabel.setText(QCoreApplication.translate("mainWindow", u"\u6240\u9009\u57fa\u91d1\u5217\u8868", None))
-        self.fundTabelLabel.setText(QCoreApplication.translate("mainWindow", u"asdfsadf", None))
+        self.fundNameLabel.setText(QCoreApplication.translate("mainWindow", u"\u57fa\u91d1\u540d\u79f0[\u57fa\u91d1\u4ee3\u7801]", None))
+        self.fundBasicInfoButton.setText(QCoreApplication.translate("mainWindow", u"\u57fa\u672c\u4fe1\u606f", None))
+        self.fundNetValueButton.setText(QCoreApplication.translate("mainWindow", u"\u51c0\u503c\u56fe\u8868", None))
+        self.fundHoldDataButton.setText(QCoreApplication.translate("mainWindow", u"\u57fa\u91d1\u6301\u4ed3", None))
+        self.label.setText(QCoreApplication.translate("mainWindow", u"\u603b\u8d44\u4ea7:", None))
+        self.label_4.setText(QCoreApplication.translate("mainWindow", u"\u6301\u4ed3\u6536\u76ca:", None))
+        self.label_5.setText(QCoreApplication.translate("mainWindow", u"\u6536\u76ca\u7387:", None))
+        self.label_13.setText(QCoreApplication.translate("mainWindow", u"\u65e5\u6da8\u8dcc:", None))
+        self.fundTotalLabel.setText(QCoreApplication.translate("mainWindow", u"000000000.00", None))
+        self.fundProfitLabel.setText(QCoreApplication.translate("mainWindow", u"00000000.00", None))
+        self.fundProfitRatioLabel.setText(QCoreApplication.translate("mainWindow", u"0.00%", None))
+        self.fundADRatioLabel.setText(QCoreApplication.translate("mainWindow", u"0.00%", None))
+        self.label_8.setText(QCoreApplication.translate("mainWindow", u"\u6301\u4ed3\u6210\u672c:", None))
+        self.label_10.setText(QCoreApplication.translate("mainWindow", u"\u6301\u6709\u4efd\u989d:", None))
+        self.label_12.setText(QCoreApplication.translate("mainWindow", u"\u6700\u65b0\u51c0\u503c:", None))
+        self.label_15.setText(QCoreApplication.translate("mainWindow", u"\u51c0\u503c\u65e5\u671f:", None))
+        self.fundHeldCostLabel.setText(QCoreApplication.translate("mainWindow", u"000000000.00", None))
+        self.fundHeldSharesLabel.setText(QCoreApplication.translate("mainWindow", u"000000000.00", None))
+        self.fundNetValueLabel.setText(QCoreApplication.translate("mainWindow", u"0.0000", None))
+        self.fundNVDateLabel.setText(QCoreApplication.translate("mainWindow", u"0000-00-00", None))
         self.menuFile.setTitle(QCoreApplication.translate("mainWindow", u"\u6587\u4ef6(F)", None))
         self.menuHelp.setTitle(QCoreApplication.translate("mainWindow", u"\u5e2e\u52a9(H)", None))
         self.menuTool.setTitle(QCoreApplication.translate("mainWindow", u"\u5de5\u5177(&T)", None))

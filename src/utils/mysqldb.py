@@ -100,6 +100,12 @@ class MySQLDatabase:
         result = self.execute_query(sql)
         return result
 
+    def getFundAccountData(self, code):
+        sql = "SELECT * FROM `fund_list` WHERE `code`=%s"
+        params = (code,)
+        result = self.execute_query(sql, params=params)
+        return result[0] if result else None
+
     def getFundTradeData(self, trade_date):
         sql = "SELECT `code`,`trade_date`,`trade_text` FROM `fund_trade` WHERE `trade_date`=%s ORDER BY `code`"
         params = (trade_date,)
@@ -205,6 +211,12 @@ class MySQLDatabase:
         params = (code,)
         result = self.execute_query(sql, params=params)
         return result[0] if result else None
+
+    def getFundActionData(self, code):
+        sql = "SELECT action_date, action_type, amount, remark FROM `fund_action` WHERE `code` = %s ORDER BY `action_date`"
+        params = (code,)
+        result = self.execute_query(sql, params=params)
+        return result
 
 
 # -----------------------------------------------------------------------------

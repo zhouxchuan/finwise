@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1241</width>
+    <width>1262</width>
     <height>810</height>
    </rect>
   </property>
@@ -130,58 +130,277 @@ QGroupBox
    <widget class="QWidget" name="rightWidget" native="true">
     <property name="geometry">
      <rect>
-      <x>400</x>
-      <y>30</y>
+      <x>340</x>
+      <y>20</y>
       <width>631</width>
-      <height>471</height>
+      <height>481</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_2">
-     <property name="spacing">
-      <number>0</number>
-     </property>
-     <property name="leftMargin">
-      <number>0</number>
-     </property>
-     <property name="topMargin">
-      <number>0</number>
-     </property>
-     <property name="rightMargin">
-      <number>0</number>
-     </property>
-     <property name="bottomMargin">
-      <number>0</number>
-     </property>
      <item>
-      <widget class="QLabel" name="fundTabelLabel">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>25</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>-1</pointsize>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">padding: 2px 10px;
-font-size: 14px;</string>
-       </property>
+      <widget class="QFrame" name="frame">
        <property name="frameShape">
         <enum>QFrame::Shape::StyledPanel</enum>
        </property>
        <property name="frameShadow">
-        <enum>QFrame::Shadow::Sunken</enum>
+        <enum>QFrame::Shadow::Raised</enum>
        </property>
-       <property name="text">
-        <string>asdfsadf</string>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="spacing">
+         <number>5</number>
+        </property>
+        <property name="leftMargin">
+         <number>5</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="fundNameLabel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>-1</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">font-size: 14px;</string>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Shape::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Shadow::Sunken</enum>
+          </property>
+          <property name="text">
+           <string>基金名称[基金代码]</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="fundBasicInfoButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>基本信息</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="fundNetValueButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>净值图表</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="fundHoldDataButton">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>基金持仓</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QFrame" name="fundDataFrame">
+       <property name="frameShape">
+        <enum>QFrame::Shape::StyledPanel</enum>
        </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+       <property name="frameShadow">
+        <enum>QFrame::Shadow::Raised</enum>
        </property>
+       <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0" columnstretch="2,2,1,1">
+        <property name="leftMargin">
+         <number>20</number>
+        </property>
+        <property name="topMargin">
+         <number>10</number>
+        </property>
+        <property name="rightMargin">
+         <number>5</number>
+        </property>
+        <property name="bottomMargin">
+         <number>10</number>
+        </property>
+        <property name="spacing">
+         <number>10</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>总资产:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>持仓收益:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>收益率:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QLabel" name="label_13">
+          <property name="text">
+           <string>日涨跌:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="fundTotalLabel">
+          <property name="styleSheet">
+           <string notr="true">font-size: 20px; font-weight: bold;</string>
+          </property>
+          <property name="text">
+           <string>000000000.00</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="fundProfitLabel">
+          <property name="styleSheet">
+           <string notr="true">font-size: 20px; font-weight: bold;</string>
+          </property>
+          <property name="text">
+           <string>00000000.00</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLabel" name="fundProfitRatioLabel">
+          <property name="styleSheet">
+           <string notr="true">font-size: 20px; font-weight: bold;</string>
+          </property>
+          <property name="text">
+           <string>0.00%</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QLabel" name="fundADRatioLabel">
+          <property name="styleSheet">
+           <string notr="true">font-size: 20px; font-weight: bold;</string>
+          </property>
+          <property name="text">
+           <string>0.00%</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>持仓成本:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>持有份额:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QLabel" name="label_12">
+          <property name="text">
+           <string>最新净值:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="3">
+         <widget class="QLabel" name="label_15">
+          <property name="text">
+           <string>净值日期:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="fundHeldCostLabel">
+          <property name="styleSheet">
+           <string notr="true">font-size: 14px;</string>
+          </property>
+          <property name="text">
+           <string>000000000.00</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QLabel" name="fundHeldSharesLabel">
+          <property name="styleSheet">
+           <string notr="true">font-size: 14px;</string>
+          </property>
+          <property name="text">
+           <string>000000000.00</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="2">
+         <widget class="QLabel" name="fundNetValueLabel">
+          <property name="styleSheet">
+           <string notr="true">font-size: 14px;</string>
+          </property>
+          <property name="text">
+           <string>0.0000</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="3">
+         <widget class="QLabel" name="fundNVDateLabel">
+          <property name="styleSheet">
+           <string notr="true">font-size: 14px;</string>
+          </property>
+          <property name="text">
+           <string>0000-00-00</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </item>
      <item>
@@ -207,12 +426,31 @@ font-size: 14px;</string>
        <property name="columnCount">
         <number>3</number>
        </property>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
        <row/>
        <row/>
        <row/>
        <column/>
        <column/>
        <column/>
+      </widget>
+     </item>
+     <item>
+      <widget class="QFrame" name="frame_2">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::Shape::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Shadow::Raised</enum>
+       </property>
       </widget>
      </item>
     </layout>
@@ -223,7 +461,7 @@ font-size: 14px;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1241</width>
+     <width>1262</width>
      <height>33</height>
     </rect>
    </property>
@@ -558,7 +796,55 @@ font-size: 14px;</string>
     </hint>
     <hint type="destinationlabel">
      <x>450</x>
-     <y>1003</y>
+     <y>809</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fundBasicInfoButton</sender>
+   <signal>clicked()</signal>
+   <receiver>mainWindow</receiver>
+   <slot>onActionFundBasicInfoTriggered()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>746</x>
+     <y>108</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1117</x>
+     <y>984</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fundNetValueButton</sender>
+   <signal>clicked()</signal>
+   <receiver>mainWindow</receiver>
+   <slot>onActionFundNetValueTriggered()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>826</x>
+     <y>102</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1351</x>
+     <y>784</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>fundHoldDataButton</sender>
+   <signal>clicked()</signal>
+   <receiver>mainWindow</receiver>
+   <slot>onActionFundHoldDataTriggered()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>923</x>
+     <y>102</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1423</x>
+     <y>793</y>
     </hint>
    </hints>
   </connection>
@@ -573,5 +859,8 @@ font-size: 14px;</string>
   <slot>onActionTradeFundTriggered()</slot>
   <slot>onActionAboutTriggered()</slot>
   <slot>onFundListWidgetItemSelectionChanged()</slot>
+  <slot>onActionFundBasicInfoTriggered()</slot>
+  <slot>onActionFundNetValueTriggered()</slot>
+  <slot>onActionFundHoldDataTriggered()</slot>
  </slots>
 </ui>
