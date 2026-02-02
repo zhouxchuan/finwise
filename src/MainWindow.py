@@ -13,6 +13,7 @@ from AboutDialog import AboutDialog
 from FundBasicInfoDialog import FundBasicInfoDialog
 from FundNetValueDialog import FundNetValueDialog
 from FundHoldDataDialog import FundHoldDataDialog
+from FundActionDialog import FundActionDialog
 
 
 class MainWindow(QMainWindow, Ui_mainWindow):
@@ -25,6 +26,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.setupUi(self)
 
         self.userid = None
+        self.current_fund = {"code": None, "name": None}
 
         self.setWindowTitle('基金分析1.0 [未登录]')
         self.statusBar.showMessage('请先登录验证账户密码')
@@ -52,15 +54,15 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.fundListWidgetContextMenu.addAction(QAction(u'基金持仓', self, triggered=self.onActionFundHoldDataTriggered))
 
         self.fundTableWidget.setEnabled(False)
-        self.fundTableWidget.setColumnCount(4)
-        self.fundTableWidget.setHorizontalHeaderLabels(['日期', '操作', '数量', '标注'])
+        self.fundTableWidget.setColumnCount(6)
+        self.fundTableWidget.setHorizontalHeaderLabels(['日期', '买/卖', '金额', '份额', '净值', '标注'])
         self.fundTableWidget.setRowCount(0)
         self.fundTableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.fundTableWidget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.fundTableWidget.customContextMenuRequested.connect(self.onFundTableWidgetContextMenu)
         self.fundTableWidgetContextMenu = QMenu(self)
         self.fundTableWidgetContextMenu.addAction(QAction(u'添加记录', self, triggered=self.onActionFundAddRecordTriggered))
-        self.fundTableWidgetContextMenu.addAction(QAction(u'修改记录', self, triggered=self.onActionFundModifyRecordTriggered))
+        self.fundTableWidgetContextMenu.addAction(QAction(u'更新记录', self, triggered=self.onActionFundUpdateRecordTriggered))
         self.fundTableWidgetContextMenu.addAction(QAction(u'删除记录', self, triggered=self.onActionFundDeleteRecordTriggered))
 
     def loadFundList(self):
@@ -161,35 +163,17 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         aboutDialog.exec()
 
     def onActionFundBasicInfoTriggered(self):
-        item = self.fundListWidget.currentItem()
-        if item is None:
-            return
-        item_data = item.data(Qt.UserRole)
-        if item_data is None:
-            return
-        dialog = FundBasicInfoDialog(parent=self, params=item_data)
+        dialog = FundBasicInfoDialog(parent=self, params=self.current_fund)
         dialog.loadData()
         dialog.exec()
 
     def onActionFundNetValueTriggered(self):
-        item = self.fundListWidget.currentItem()
-        if item is None:
-            return
-        item_data = item.data(Qt.UserRole)
-        if item_data is None:
-            return
-        dialog = FundNetValueDialog(parent=self, params=item_data)
+        dialog = FundNetValueDialog(parent=self, params=self.current_fund)
         dialog.loadData(6)
         dialog.exec()
 
     def onActionFundHoldDataTriggered(self):
-        item = self.fundListWidget.currentItem()
-        if item is None:
-            return
-        item_data = item.data(Qt.UserRole)
-        if item_data is None:
-            return
-        dialog = FundHoldDataDialog(parent=self, params=item_data)
+        dialog = FundHoldDataDialog(parent=self, params=self.current_fund)
         dialog.loadData()
         dialog.exec()
 
@@ -213,11 +197,12 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         item_data = item.data(Qt.UserRole)
         if item_data is None:
             return
-        item_code = item_data['code']
-        item_name = item_data['name']
-        self.statusBar.showMessage(f'已选择 [{item_code}] {item_name}')
-        self.showFundAccountData(item_code)
-        self.showFundActionData(item_code)
+        self.current_fund['code'] = item_data['code']
+        self.current_fund['name'] = item_data['name']
+
+        self.statusBar.showMessage(f'已选择 [{self.current_fund["code"]}] {self.current_fund["name"]}')
+        self.showFundAccountData(self.current_fund["code"])
+        self.showFundActionData(self.current_fund["code"])
 
     def showFundAccountData(self, code):
         '''
@@ -282,21 +267,6 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.fundTableWidget.setRowCount(len(data))
         for row, item in enumerate(data):
             for col, value in enumerate(item.values()):
-                if col == 1:
-                    if value == 0:
-                        value = '买入金额'
-                    elif value == 1:
-                        value = '卖出份额'
-                    else:
-                        value = '-'
-
-                if col == 3:
-                    if value == 0:
-                        value = '已执行'
-                    elif value == 1:
-                        value = '未执行'
-                    else:
-                        value = '-'
                 item = QTableWidgetItem(str(value))
                 item.setData(Qt.UserRole, item)
                 item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -322,36 +292,52 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         '''
         添加基金持仓记录ACTION事件
         '''
+        dialog = FundActionDialog(parent=self, params=self.current_fund, mode='add')
+        if dialog.exec() == QDialog.Accepted:
+            self.showFundAccountData(self.current_fund['code'])
+
+    def onActionFundUpdateRecordTriggered(self):
+        '''
+        修改基金持仓记录ACTION事件
+        '''
+
         item = self.fundTableWidget.currentItem()
         if item is None:
             return
-        item_data = item.data(Qt.UserRole)
-        if item_data is None:
-            return
-        dialog = FundAddRecordDialog(parent=self, params=item_data)
-        dialog.exec()
+        row = item.row()
 
-    def onActionFundModifyRecordTriggered(self):
-        '''
-        Docstring for onActionFundModifyRecordTriggered
+        action_date = self.fundTableWidget.item(row, 0).text()
+        action_type = self.fundTableWidget.item(row, 1).text()
+        cost_amount = self.fundTableWidget.item(row, 2).text()
+        share_amount = self.fundTableWidget.item(row, 3).text()
+        net_value = self.fundTableWidget.item(row, 4).text()
+        remark = self.fundTableWidget.item(row, 5).text()
 
-        :param self: Description
-        '''
-        pass
+        params = {'code': self.current_fund['code'],
+                  'name': self.current_fund['name'],
+                  'action_date': action_date,
+                  'action_type': action_type,
+                  'cost_amount': cost_amount,
+                  'share_amount': share_amount,
+                  'net_value': net_value,
+                  'remark': remark}
+        dialog = FundActionDialog(parent=self, params=params, mode='update')
+        if dialog.exec() == QDialog.Accepted:
+            self.showFundAccountData(self.current_fund['code'])
 
     def onActionFundDeleteRecordTriggered(self):
         '''
         删除基金持仓记录ACTION事件
         '''
+        code = self.current_fund['code']
+        name = self.current_fund['name']
+
         item = self.fundTableWidget.currentItem()
         if item is None:
             return
-        item_data = item.data(Qt.UserRole)
-        if item_data is None:
-            return
-        item_code = item_data['code']
-        item_date = item_data['date']
-        if QMessageBox.question(self, '提示', f"是否确定删除 [{item_code}] {item_date} 的持仓记录?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No) == QMessageBox.Yes:
-            MySQLDB.deleteFundHoldRecord(item_code, item_date)
-            self.loadFundHoldData()
-            self.statusBar.showMessage(f'已删除 [{item_code}] {item_date} 的持仓记录', 3000)
+        row = item.row()
+        action_date = self.fundTableWidget.item(row, 0).text()
+        if QMessageBox.question(self, '提示', f"是否确定删除 [{code}] {name} {action_date} 的持仓记录?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No) == QMessageBox.Yes:
+            MySQLDB.deleteFundActionData(code, action_date)
+            self.showFundAccountData(code)
+            self.statusBar.showMessage(f'已删除 [{code}] {name} {action_date} 的持仓记录', 3000)
