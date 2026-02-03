@@ -26,7 +26,7 @@ class Ui_mainWindow(object):
     def setupUi(self, mainWindow):
         if not mainWindow.objectName():
             mainWindow.setObjectName(u"mainWindow")
-        mainWindow.resize(1262, 810)
+        mainWindow.resize(1251, 768)
         mainWindow.setStyleSheet(u"QToolBar\n"
 "{\n"
 "	spacing:5px;\n"
@@ -97,9 +97,9 @@ class Ui_mainWindow(object):
         self.leftWidget.setObjectName(u"leftWidget")
         self.leftWidget.setGeometry(QRect(30, 10, 274, 461))
         self.verticalLayout = QVBoxLayout(self.leftWidget)
-        self.verticalLayout.setSpacing(0)
+        self.verticalLayout.setSpacing(6)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.verticalLayout.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout.setContentsMargins(9, 9, 9, 9)
         self.fundListLabel = QLabel(self.leftWidget)
         self.fundListLabel.setObjectName(u"fundListLabel")
         self.fundListLabel.setMinimumSize(QSize(0, 25))
@@ -124,11 +124,16 @@ class Ui_mainWindow(object):
 
         self.rightWidget = QWidget(self.centralWidget)
         self.rightWidget.setObjectName(u"rightWidget")
-        self.rightWidget.setGeometry(QRect(340, 20, 631, 481))
+        self.rightWidget.setGeometry(QRect(340, 20, 831, 571))
         self.verticalLayout_2 = QVBoxLayout(self.rightWidget)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.frame = QFrame(self.rightWidget)
         self.frame.setObjectName(u"frame")
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.frame.sizePolicy().hasHeightForWidth())
+        self.frame.setSizePolicy(sizePolicy)
         self.frame.setFrameShape(QFrame.Shape.StyledPanel)
         self.frame.setFrameShadow(QFrame.Shadow.Raised)
         self.horizontalLayout = QHBoxLayout(self.frame)
@@ -137,11 +142,11 @@ class Ui_mainWindow(object):
         self.horizontalLayout.setContentsMargins(5, 0, 0, 0)
         self.fundNameLabel = QLabel(self.frame)
         self.fundNameLabel.setObjectName(u"fundNameLabel")
-        sizePolicy = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.fundNameLabel.sizePolicy().hasHeightForWidth())
-        self.fundNameLabel.setSizePolicy(sizePolicy)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.fundNameLabel.sizePolicy().hasHeightForWidth())
+        self.fundNameLabel.setSizePolicy(sizePolicy1)
         self.fundNameLabel.setMinimumSize(QSize(0, 25))
         self.fundNameLabel.setFont(font)
         self.fundNameLabel.setStyleSheet(u"font-size: 14px;")
@@ -169,11 +174,23 @@ class Ui_mainWindow(object):
 
         self.horizontalLayout.addWidget(self.fundHoldDataButton)
 
+        self.fundAccountInitButton = QPushButton(self.frame)
+        self.fundAccountInitButton.setObjectName(u"fundAccountInitButton")
+        icon7 = QIcon(QIcon.fromTheme(QIcon.ThemeIcon.EditSelectAll))
+        self.fundAccountInitButton.setIcon(icon7)
+
+        self.horizontalLayout.addWidget(self.fundAccountInitButton)
+
 
         self.verticalLayout_2.addWidget(self.frame)
 
         self.fundDataFrame = QFrame(self.rightWidget)
         self.fundDataFrame.setObjectName(u"fundDataFrame")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.fundDataFrame.sizePolicy().hasHeightForWidth())
+        self.fundDataFrame.setSizePolicy(sizePolicy2)
         self.fundDataFrame.setFrameShape(QFrame.Shape.StyledPanel)
         self.fundDataFrame.setFrameShadow(QFrame.Shadow.Raised)
         self.gridLayout = QGridLayout(self.fundDataFrame)
@@ -275,39 +292,74 @@ class Ui_mainWindow(object):
 
         self.verticalLayout_2.addWidget(self.fundDataFrame)
 
-        self.fundTableWidget = QTableWidget(self.rightWidget)
-        if (self.fundTableWidget.columnCount() < 3):
-            self.fundTableWidget.setColumnCount(3)
-        if (self.fundTableWidget.rowCount() < 3):
-            self.fundTableWidget.setRowCount(3)
-        self.fundTableWidget.setObjectName(u"fundTableWidget")
-        self.fundTableWidget.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.fundTableWidget.setAlternatingRowColors(True)
-        self.fundTableWidget.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
-        self.fundTableWidget.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
-        self.fundTableWidget.setGridStyle(Qt.PenStyle.DotLine)
-        self.fundTableWidget.setRowCount(3)
-        self.fundTableWidget.setColumnCount(3)
-        self.fundTableWidget.verticalHeader().setVisible(False)
-
-        self.verticalLayout_2.addWidget(self.fundTableWidget)
-
         self.frame_2 = QFrame(self.rightWidget)
         self.frame_2.setObjectName(u"frame_2")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(self.frame_2.sizePolicy().hasHeightForWidth())
-        self.frame_2.setSizePolicy(sizePolicy1)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.frame_2.sizePolicy().hasHeightForWidth())
+        self.frame_2.setSizePolicy(sizePolicy3)
+        self.frame_2.setMinimumSize(QSize(0, 150))
         self.frame_2.setFrameShape(QFrame.Shape.StyledPanel)
         self.frame_2.setFrameShadow(QFrame.Shadow.Raised)
 
         self.verticalLayout_2.addWidget(self.frame_2)
 
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.anvTableWidget = QTableWidget(self.rightWidget)
+        if (self.anvTableWidget.columnCount() < 2):
+            self.anvTableWidget.setColumnCount(2)
+        if (self.anvTableWidget.rowCount() < 2):
+            self.anvTableWidget.setRowCount(2)
+        self.anvTableWidget.setObjectName(u"anvTableWidget")
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        sizePolicy4.setHorizontalStretch(2)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.anvTableWidget.sizePolicy().hasHeightForWidth())
+        self.anvTableWidget.setSizePolicy(sizePolicy4)
+        self.anvTableWidget.setMinimumSize(QSize(0, 100))
+        self.anvTableWidget.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.anvTableWidget.setAlternatingRowColors(True)
+        self.anvTableWidget.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
+        self.anvTableWidget.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.anvTableWidget.setGridStyle(Qt.PenStyle.DotLine)
+        self.anvTableWidget.setRowCount(2)
+        self.anvTableWidget.setColumnCount(2)
+        self.anvTableWidget.verticalHeader().setVisible(False)
+
+        self.horizontalLayout_2.addWidget(self.anvTableWidget)
+
+        self.actionTableWidget = QTableWidget(self.rightWidget)
+        if (self.actionTableWidget.columnCount() < 3):
+            self.actionTableWidget.setColumnCount(3)
+        if (self.actionTableWidget.rowCount() < 3):
+            self.actionTableWidget.setRowCount(3)
+        self.actionTableWidget.setObjectName(u"actionTableWidget")
+        sizePolicy5 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        sizePolicy5.setHorizontalStretch(3)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(self.actionTableWidget.sizePolicy().hasHeightForWidth())
+        self.actionTableWidget.setSizePolicy(sizePolicy5)
+        self.actionTableWidget.setMinimumSize(QSize(0, 100))
+        self.actionTableWidget.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.actionTableWidget.setAlternatingRowColors(True)
+        self.actionTableWidget.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.actionTableWidget.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.actionTableWidget.setGridStyle(Qt.PenStyle.DotLine)
+        self.actionTableWidget.setRowCount(3)
+        self.actionTableWidget.setColumnCount(3)
+        self.actionTableWidget.verticalHeader().setVisible(False)
+
+        self.horizontalLayout_2.addWidget(self.actionTableWidget)
+
+
+        self.verticalLayout_2.addLayout(self.horizontalLayout_2)
+
         mainWindow.setCentralWidget(self.centralWidget)
         self.menuBar = QMenuBar(mainWindow)
         self.menuBar.setObjectName(u"menuBar")
-        self.menuBar.setGeometry(QRect(0, 0, 1262, 33))
+        self.menuBar.setGeometry(QRect(0, 0, 1251, 33))
         self.menuFile = QMenu(self.menuBar)
         self.menuFile.setObjectName(u"menuFile")
         self.menuHelp = QMenu(self.menuBar)
@@ -362,6 +414,7 @@ class Ui_mainWindow(object):
         self.fundBasicInfoButton.clicked.connect(mainWindow.onActionFundBasicInfoTriggered)
         self.fundNetValueButton.clicked.connect(mainWindow.onActionFundNetValueTriggered)
         self.fundHoldDataButton.clicked.connect(mainWindow.onActionFundHoldDataTriggered)
+        self.fundAccountInitButton.clicked.connect(mainWindow.onActionAccountInitTriggered)
 
         QMetaObject.connectSlotsByName(mainWindow)
     # setupUi
@@ -424,6 +477,7 @@ class Ui_mainWindow(object):
         self.fundBasicInfoButton.setText(QCoreApplication.translate("mainWindow", u"\u57fa\u672c\u4fe1\u606f", None))
         self.fundNetValueButton.setText(QCoreApplication.translate("mainWindow", u"\u51c0\u503c\u56fe\u8868", None))
         self.fundHoldDataButton.setText(QCoreApplication.translate("mainWindow", u"\u57fa\u91d1\u6301\u4ed3", None))
+        self.fundAccountInitButton.setText("")
         self.label.setText(QCoreApplication.translate("mainWindow", u"\u603b\u8d44\u4ea7:", None))
         self.label_4.setText(QCoreApplication.translate("mainWindow", u"\u6301\u4ed3\u6536\u76ca:", None))
         self.label_5.setText(QCoreApplication.translate("mainWindow", u"\u6536\u76ca\u7387:", None))

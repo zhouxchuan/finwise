@@ -218,16 +218,27 @@ class MySQLDatabase:
         result = self.execute_query(sql, params=params)
         return result[0] if result else None
 
+    def getFundNetValue(self, code, start_date, end_date):
+        sql = "SELECT `trade_date`,`asset_net_value`, `cum_net_value` FROM `fund_history` WHERE `code` = %s AND `trade_date` BETWEEN %s AND %s ORDER BY `trade_date` DESC"
+        params = (code, start_date, end_date)
+        result = self.execute_query(sql, params=params)
+        return result
+
+    def setFundAccountInitData(self, code, init_cost, init_share):
+        sql = "UPDATE `fund_list` SET `held_cost`=%s, `held_shares`=%s WHERE `code`=%s"
+        params = (init_cost, init_share, code)
+        rowcount = self.execute_update(sql, params=params)
+        return rowcount
+
     def getFundActionData(self, code):
-        sql = "SELECT action_date, action_type, cost_amount, share_amount, net_value,remark FROM `fund_action` WHERE `code` = %s ORDER BY `action_date`"
+        sql = "SELECT `action_date`, `action_type`, `amount`, `remark` FROM `fund_action` WHERE `code` = %s ORDER BY `action_date`"
         params = (code,)
         result = self.execute_query(sql, params=params)
         return result
 
-    def setFundActionData(self, data):
-        sql = "REPLACE INTO `fund_action` (`code`, `action_date`, `action_type`, `cost_amount`, `share_amount`, `net_value`, `remark`) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-        params = (data['code'], data['action_date'], data['action_type'], data['cost_amount'],
-                  data['share_amount'], data['net_value'], data['remark'])
+    def setFundActionData(self, code, action_date, action_type, amount):
+        sql = "REPLACE INTO `fund_action` (`code`, `action_date`, `action_type`, `amount`, `remark`) VALUES (%s, %s, %s, %s, '未执行')"
+        params = (code, action_date, action_type, amount)
         rowcount = self.execute_update(sql, params=params)
         return rowcount
 
