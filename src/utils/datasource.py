@@ -14,7 +14,6 @@ import json
 
 # TS_TOKEN = '31e5536e4d0ffbfb47a74e9832fd35c711fdaa2405bec6559b62d22d'
 
-
 class DataSource:
     def __init__(self, name=__name__):
         self.__name = name
@@ -25,11 +24,12 @@ class DataSource:
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36"
         })
 
-    def getAllFunds(self):
+    def getAllFunds(self, company='80000229'):
         '''
         从东方财富获取易方达基金列表
+        :param company: 公司代码，默认易方达
         '''
-        url = 'http://fund.eastmoney.com/Company/80000229.html'
+        url = f'http://fund.eastmoney.com/Company/{company}.html'
 
         try:
             with self.session.get(url=url) as response:

@@ -2,6 +2,9 @@ import mysql.connector
 from utils.logger import log
 import hashlib
 import pandas as pd
+import json
+from datetime import date
+import pandas as pd
 
 mysql_config = {
     'host': 'localhost',
@@ -55,7 +58,7 @@ class MySQLDatabase:
             return result
         except Exception as e:
             print(f"查询执行失败: {e}")
-            raise
+            return None
         finally:
             # 确保资源被正确释放
             if cursor:
@@ -74,11 +77,12 @@ class MySQLDatabase:
 
             # 执行更新
             cursor.execute(sql, params)
+
             # self.cnx.commit()
             return cursor.rowcount
         except Exception as e:
             print(f"更新执行失败: {e}")
-            raise
+            return -1
         finally:
             # 确保资源被正确释放
             if cursor:
@@ -95,73 +99,74 @@ class MySQLDatabase:
         result = self.execute_query(sql, params)
         return result[0]['COUNT(*)'] > 0 if result else False
 
-    def getFundList(self):
-        sql = "SELECT * FROM `fund_list` ORDER BY `order` ASC"
+    def getFundAccountList(self):
+        '''
+        获取基金账户列表
+        '''
+        sql = "SELECT * FROM `fund_account` ORDER BY `order` ASC"
         result = self.execute_query(sql)
         return result
 
-    def getFundAccountData(self, code):
-        sql = "SELECT * FROM `fund_list` WHERE `code`=%s"
+    def getFundAccount(self, code):
+        '''
+        获取指定基金账户数据
+        :param code: 基金代码
+        '''
+        sql = "SELECT * FROM `fund_account` WHERE `code`=%s"
         params = (code,)
         result = self.execute_query(sql, params=params)
         return result[0] if result else None
 
-    def getFundTradeData(self, trade_date):
-        sql = "SELECT `code`,`trade_date`,`trade_text` FROM `fund_trade` WHERE `trade_date`=%s ORDER BY `code`"
-        params = (trade_date,)
-        result = self.execute_query(sql, params=params)
-        return result
-
-    def setFundTradeData(self, code, trade_date, trade_text):
-        sql = "REPLACE INTO `fund_trade` (`code`, `trade_date`, `trade_text`) VALUES (%s, %s, %s)"
-        params = (code, trade_date, trade_text)
-        rowcount = self.execute_update(sql, params=params)
-        return rowcount
-
-    def removeFundTradeData(self, code, trade_date):
-        sql = "DELETE FROM `fund_trade` WHERE `code`=%s AND `trade_date`=%s"
-        params = (code, trade_date)
-        rowcount = self.execute_update(sql, params=params)
-        return rowcount
-
-    def setFundItem(self, code, name):
-        sql = "REPLACE INTO fund_list (`code`, `name`) VALUES (%s, %s)"
+    def addFundAccount(self, code, name):
+        '''
+        添加基金账户数据
+        :param code: 基金代码
+        :param name: 基金名称
+        '''
+        sql = "INSERT INTO fund_account (`code`, `name`) VALUES (%s, %s)"
         params = (code, name,)
         rowcount = self.execute_update(sql, params=params)
         return rowcount
 
-    def deleteFundItem(self, code):
-        sql = "DELETE FROM fund_list WHERE code = %s"
+    def deleteFundAccount(self, code):
+        '''
+        删除基金账户数据
+        :param code: 基金代码
+        '''
+        sql = "DELETE FROM fund_account WHERE code = %s"
         params = (code,)
         rowcount = self.execute_update(sql, params=params)
         return rowcount
 
-    def getFundBasicData(self, code):
-        sql = "SELECT * FROM fund_basic WHERE code = %s"
-        params = (code,)
-        result = self.execute_query(sql, params=params)
-        return result[0] if result else None
-
-    def setFundBasicData(self, data):
-        code = data['基金代码']
-        name = data['基金名称']
-        fullname = data['基金全称']
-        found_date = data['成立时间']
-        scale = data['最新规模']
-        company = data['基金公司']
-        manager = data['基金经理']
-        bank = data['托管银行']
-        type = data['基金类型']
-        rating = data['基金评级']
-        investment_strategy = data['投资策略']
-        investment_goal = data['投资目标']
-        benchmark = data['业绩比较基准']
-
-        sql = "REPLACE INTO fund_basic (`code`, `name`, `fullname`,`found_date`,`scale`,`company`,`manager`,`bank`,`type`,`rating`,`investment_strategy`,`investment_goal`,`benchmark`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        params = (code, name, fullname, found_date, scale, company, manager, bank,
-                  type, rating, investment_strategy, investment_goal, benchmark,)
+    def setFundAccountBasicInfo(self, code, data):
+        sql = "UPDATE fund_account SET `basic_info`=%s WHERE `code`=%s"
+        params = (json.dumps(data, ensure_ascii=False), code)
         rowcount = self.execute_update(sql, params=params)
         return rowcount
+
+    def setFundAccountListOrder(self, code, order):
+        sql = "UPDATE fund_account SET `order`=%s WHERE `code`=%s"
+        params = (order, code)
+        rowcount = self.execute_update(sql, params=params)
+        return rowcount
+
+    # def getFundTradeData(self, trade_date):
+    #     sql = "SELECT `code`,`trade_date`,`trade_text` FROM `fund_trade` WHERE `trade_date`=%s ORDER BY `code`"
+    #     params = (trade_date,)
+    #     result = self.execute_query(sql, params=params)
+    #     return result
+
+    # def setFundTradeData(self, code, trade_date, trade_text):
+    #     sql = "REPLACE INTO `fund_trade` (`code`, `trade_date`, `trade_text`) VALUES (%s, %s, %s)"
+    #     params = (code, trade_date, trade_text)
+    #     rowcount = self.execute_update(sql, params=params)
+    #     return rowcount
+
+    # def removeFundTradeData(self, code, trade_date):
+    #     sql = "DELETE FROM `fund_trade` WHERE `code`=%s AND `trade_date`=%s"
+    #     params = (code, trade_date)
+    #     rowcount = self.execute_update(sql, params=params)
+    #     return rowcount
 
     def getFundHistoryData(self, code):
         sql = "SELECT * FROM fund_history WHERE code = %s"
@@ -247,6 +252,35 @@ class MySQLDatabase:
         params = (code, action_date)
         rowcount = self.execute_update(sql, params=params)
         return rowcount
+
+    def initFundHoldingData(self, code, cost, share):
+        '''
+        初始化基金持仓数据
+        :param code: 基金代码
+        :param cost: 持仓成本
+        :param share: 持仓份额
+        '''
+        holding_date = date.today().strftime("%Y-%m-%d")
+        sql = "SELECT `holding_date` FROM `fund_holding` WHERE `code` = %s ORDER BY `holding_date` ASC LIMIT 1"
+        params = (code,)
+        result = self.execute_query(sql, params=params)
+        if result is not None and len(result) > 0:
+            holding_date = result[0]['holding_date']
+
+        sql = "REPLACE INTO `fund_holding` (`code`, `holding_date`, `cost`, `share`) VALUES (%s, %s, %s, %s)"
+        params = (code, holding_date, cost, share)
+        rowcount = self.execute_update(sql, params=params)
+        return rowcount
+
+    def getFundLastestHoldingData(self, code):
+        '''
+        获得基金最新持仓数据
+        :param code: 基金代码
+        '''
+        sql = "SELECT `code`, `holding_date`,`cost`, `share` FROM `fund_holding` WHERE `code` = %s ORDER BY `holding_date` DESC"
+        params = (code,)
+        result = self.execute_query(sql, params=params)
+        return result[0] if result else None
 
 
 # -----------------------------------------------------------------------------

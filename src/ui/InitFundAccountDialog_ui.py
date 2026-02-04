@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'FundAccountInitDialog.ui'
+## Form generated from reading UI file 'InitFundAccountDialog.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.10.1
 ##
@@ -19,14 +19,14 @@ from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogBu
     QFrame, QHBoxLayout, QLabel, QLineEdit,
     QSizePolicy, QSpacerItem, QVBoxLayout, QWidget)
 
-class Ui_FundAccountInitDialog(object):
-    def setupUi(self, FundAccountInitDialog):
-        if not FundAccountInitDialog.objectName():
-            FundAccountInitDialog.setObjectName(u"FundAccountInitDialog")
-        FundAccountInitDialog.resize(368, 360)
-        self.verticalLayout = QVBoxLayout(FundAccountInitDialog)
+class Ui_InitFundAccountDialog(object):
+    def setupUi(self, InitFundAccountDialog):
+        if not InitFundAccountDialog.objectName():
+            InitFundAccountDialog.setObjectName(u"InitFundAccountDialog")
+        InitFundAccountDialog.resize(368, 360)
+        self.verticalLayout = QVBoxLayout(InitFundAccountDialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.frame = QFrame(FundAccountInitDialog)
+        self.frame = QFrame(InitFundAccountDialog)
         self.frame.setObjectName(u"frame")
         self.frame.setFrameShape(QFrame.Shape.StyledPanel)
         self.frame.setFrameShadow(QFrame.Shadow.Raised)
@@ -81,7 +81,7 @@ class Ui_FundAccountInitDialog(object):
 
         self.verticalLayout.addWidget(self.frame)
 
-        self.buttonBox = QDialogButtonBox(FundAccountInitDialog)
+        self.buttonBox = QDialogButtonBox(InitFundAccountDialog)
         self.buttonBox.setObjectName(u"buttonBox")
         self.buttonBox.setOrientation(Qt.Orientation.Horizontal)
         self.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Ok)
@@ -90,18 +90,18 @@ class Ui_FundAccountInitDialog(object):
         self.verticalLayout.addWidget(self.buttonBox)
 
 
-        self.retranslateUi(FundAccountInitDialog)
-        self.buttonBox.accepted.connect(FundAccountInitDialog.accept)
-        self.buttonBox.rejected.connect(FundAccountInitDialog.reject)
+        self.retranslateUi(InitFundAccountDialog)
+        self.buttonBox.accepted.connect(InitFundAccountDialog.accept)
+        self.buttonBox.rejected.connect(InitFundAccountDialog.reject)
 
-        QMetaObject.connectSlotsByName(FundAccountInitDialog)
+        QMetaObject.connectSlotsByName(InitFundAccountDialog)
     # setupUi
 
-    def retranslateUi(self, FundAccountInitDialog):
-        FundAccountInitDialog.setWindowTitle(QCoreApplication.translate("FundAccountInitDialog", u"\u521d\u59cb\u5316\u8d26\u6237\u6570\u636e", None))
+    def retranslateUi(self, InitFundAccountDialog):
+        InitFundAccountDialog.setWindowTitle(QCoreApplication.translate("InitFundAccountDialog", u"\u521d\u59cb\u5316\u8d26\u6237\u6570\u636e", None))
         self.fundLabel.setText("")
-        self.label.setText(QCoreApplication.translate("FundAccountInitDialog", u"\u521d\u59cb\u91d1\u989d:", None))
-        self.label_2.setText(QCoreApplication.translate("FundAccountInitDialog", u"\u521d\u59cb\u4efd\u989d:", None))
+        self.label.setText(QCoreApplication.translate("InitFundAccountDialog", u"\u521d\u59cb\u91d1\u989d:", None))
+        self.label_2.setText(QCoreApplication.translate("InitFundAccountDialog", u"\u521d\u59cb\u4efd\u989d:", None))
         self.msgLabel.setText("")
     # retranslateUi
 

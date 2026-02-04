@@ -418,7 +418,7 @@ QGroupBox
            <string notr="true">font-size: 14px;</string>
           </property>
           <property name="text">
-           <string>0000-00-00</string>
+           <string>N/A</string>
           </property>
          </widget>
         </item>
@@ -560,6 +560,8 @@ QGroupBox
     <addaction name="actionLogin"/>
     <addaction name="actionLogout"/>
     <addaction name="separator"/>
+    <addaction name="actionCreateFundAccount"/>
+    <addaction name="actionSetupFundAccount"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -573,11 +575,7 @@ QGroupBox
     <property name="title">
      <string>工具(&amp;T)</string>
     </property>
-    <addaction name="separator"/>
-    <addaction name="actionSync"/>
-    <addaction name="separator"/>
-    <addaction name="separator"/>
-    <addaction name="actionSetup"/>
+    <addaction name="actionSyncFundHistory"/>
    </widget>
    <widget class="QMenu" name="menu">
     <property name="title">
@@ -682,9 +680,9 @@ QGroupBox
     <string>注销账户</string>
    </property>
   </action>
-  <action name="actionSync">
+  <action name="actionSyncFundHistory">
    <property name="enabled">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="icon">
     <iconset theme="QIcon::ThemeIcon::MediaPlaylistRepeat"/>
@@ -702,21 +700,27 @@ QGroupBox
     <string>Alt+S</string>
    </property>
   </action>
-  <action name="actionSetup">
+  <action name="actionSetupFundAccount">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset theme="QIcon::ThemeIcon::DocumentProperties"/>
    </property>
    <property name="text">
-    <string>设置(&amp;S)</string>
+    <string>配置基金账户(&amp;S)...</string>
    </property>
    <property name="iconText">
-    <string>设置</string>
+    <string>配置基金账户</string>
    </property>
    <property name="toolTip">
-    <string>设置</string>
+    <string>配置基金账户</string>
    </property>
   </action>
   <action name="actionAnalyzeIndex">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>指数分析(&amp;I)...</string>
    </property>
@@ -728,6 +732,9 @@ QGroupBox
    </property>
   </action>
   <action name="actionTradeFund">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset theme="QIcon::ThemeIcon::MediaPlaylistShuffle"/>
    </property>
@@ -739,6 +746,22 @@ QGroupBox
    </property>
    <property name="toolTip">
     <string>基金交易</string>
+   </property>
+  </action>
+  <action name="actionCreateFundAccount">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::ListAdd"/>
+   </property>
+   <property name="text">
+    <string>创建基金账户...</string>
+   </property>
+  </action>
+  <action name="actionDeleteFundAccount">
+   <property name="text">
+    <string>删除基金账户</string>
    </property>
   </action>
  </widget>
@@ -793,10 +816,10 @@ QGroupBox
    </hints>
   </connection>
   <connection>
-   <sender>actionSync</sender>
+   <sender>actionSyncFundHistory</sender>
    <signal>triggered()</signal>
    <receiver>mainWindow</receiver>
-   <slot>onActionSetupDataTriggered()</slot>
+   <slot>onActionSyncFundHistoryTriggered()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -809,10 +832,10 @@ QGroupBox
    </hints>
   </connection>
   <connection>
-   <sender>actionSetup</sender>
+   <sender>actionSetupFundAccount</sender>
    <signal>triggered()</signal>
    <receiver>mainWindow</receiver>
-   <slot>onActionSetupFundTriggered()</slot>
+   <slot>onActionSetupFundAccountTriggered()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -937,18 +960,50 @@ QGroupBox
    </hints>
   </connection>
   <connection>
+   <sender>actionCreateFundAccount</sender>
+   <signal>triggered()</signal>
+   <receiver>mainWindow</receiver>
+   <slot>onActionCreateFundAccountTriggered()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>625</x>
+     <y>383</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDeleteFundAccount</sender>
+   <signal>triggered()</signal>
+   <receiver>mainWindow</receiver>
+   <slot>onActionDeleteFundAccountTriggered()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>625</x>
+     <y>383</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
    <sender>fundAccountInitButton</sender>
    <signal>clicked()</signal>
    <receiver>mainWindow</receiver>
-   <slot>onActionAccountInitTriggered()</slot>
+   <slot>onActionInitFundAccountTriggered()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1149</x>
-     <y>103</y>
+     <x>1130</x>
+     <y>104</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1366</x>
-     <y>338</y>
+     <x>1329</x>
+     <y>274</y>
     </hint>
    </hints>
   </connection>
@@ -957,8 +1012,8 @@ QGroupBox
   <slot>onActionLoginTriggered()</slot>
   <slot>onActionLogoutTriggered()</slot>
   <slot>onActionExitTriggered()</slot>
-  <slot>onActionSetupDataTriggered()</slot>
-  <slot>onActionSetupFundTriggered()</slot>
+  <slot>onActionSyncFundHistoryTriggered()</slot>
+  <slot>onActionSetupFundAccountTriggered()</slot>
   <slot>onActionAnalyzeIndexTriggered()</slot>
   <slot>onActionTradeFundTriggered()</slot>
   <slot>onActionAboutTriggered()</slot>
@@ -966,6 +1021,8 @@ QGroupBox
   <slot>onActionFundBasicInfoTriggered()</slot>
   <slot>onActionFundNetValueTriggered()</slot>
   <slot>onActionFundHoldDataTriggered()</slot>
-  <slot>onActionAccountInitTriggered()</slot>
+  <slot>onActionInitFundAccountTriggered()</slot>
+  <slot>onActionCreateFundAccountTriggered()</slot>
+  <slot>onActionDeleteFundAccountTriggered()</slot>
  </slots>
 </ui>

@@ -15,9 +15,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractButton, QAbstractItemView, QApplication, QDialog,
-    QDialogButtonBox, QHeaderView, QSizePolicy, QTableWidget,
-    QTableWidgetItem, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractButton, QApplication, QDialog, QDialogButtonBox,
+    QPlainTextEdit, QSizePolicy, QVBoxLayout, QWidget)
 
 class Ui_FundBasicInfoDialog(object):
     def setupUi(self, FundBasicInfoDialog):
@@ -26,21 +25,11 @@ class Ui_FundBasicInfoDialog(object):
         FundBasicInfoDialog.resize(683, 563)
         self.verticalLayout = QVBoxLayout(FundBasicInfoDialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.tableWidget = QTableWidget(FundBasicInfoDialog)
-        if (self.tableWidget.columnCount() < 2):
-            self.tableWidget.setColumnCount(2)
-        self.tableWidget.setObjectName(u"tableWidget")
-        self.tableWidget.setMouseTracking(True)
-        self.tableWidget.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.tableWidget.setAlternatingRowColors(False)
-        self.tableWidget.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
-        self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
-        self.tableWidget.setShowGrid(False)
-        self.tableWidget.setWordWrap(False)
-        self.tableWidget.setColumnCount(2)
-        self.tableWidget.verticalHeader().setVisible(False)
+        self.plainTextEdit = QPlainTextEdit(FundBasicInfoDialog)
+        self.plainTextEdit.setObjectName(u"plainTextEdit")
+        self.plainTextEdit.setReadOnly(True)
 
-        self.verticalLayout.addWidget(self.tableWidget)
+        self.verticalLayout.addWidget(self.plainTextEdit)
 
         self.buttonBox = QDialogButtonBox(FundBasicInfoDialog)
         self.buttonBox.setObjectName(u"buttonBox")

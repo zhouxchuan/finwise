@@ -1,14 +1,13 @@
 from PySide6.QtWidgets import QMainWindow, QDialog, QMessageBox, QSplitter, QWidget, QSizePolicy, QListWidgetItem, QMenu, QTableWidgetItem, QHeaderView
 from PySide6.QtCore import Qt, QDate
 from PySide6.QtGui import QAction
-from numpy import format_float_positional
-
 
 from utils.mysqldb import MySQLDB
 from ui.MainWindow_ui import Ui_mainWindow
 from LoginDialog import LoginDialog
-from SetupDataDialog import SetupDataDialog
-from SetupFundDialog import SetupFundDialog
+from CreateFundAccountDialog import CreateFundAccountDialog
+from SyncFundHistoryDialog import SyncFundHistoryDialog
+from SetupFundAccountDialog import SetupFundAccountDialog
 from TradeFundDialog import TradeFundDialog
 from AnalyzeIndexDialog import AnalyzeIndexDialog
 from AboutDialog import AboutDialog
@@ -16,9 +15,9 @@ from FundBasicInfoDialog import FundBasicInfoDialog
 from FundNetValueDialog import FundNetValueDialog
 from FundHoldDataDialog import FundHoldDataDialog
 from FundActionDialog import FundActionDialog
-from FundAccountInitDialog import FundAccountInitDialog
+from InitFundAccountDialog import InitFundAccountDialog
 
-from utils.utils import format_float
+from utils.utils import format_convert
 
 
 class MainWindow(QMainWindow, Ui_mainWindow):
@@ -31,7 +30,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.setupUi(self)
 
         self.userid = None
-        self.current_fund = {"code": None, "name": None}
+        self.current_fund = {"code": None, "name": None, "basic_info": None}
 
         self.setWindowTitle('基金分析1.0 [未登录]')
         self.statusBar.showMessage('请先登录验证账户密码')
@@ -50,7 +49,6 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
         self.fundNameLabel.setText('[未选择基金]')
 
-        self.fundListWidget.setEnabled(False)
         self.fundListWidget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.fundListWidget.customContextMenuRequested.connect(self.onActionFundListWidgetContextMenu)
         self.fundListWidgetContextMenu = QMenu(self)
@@ -58,13 +56,11 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.fundListWidgetContextMenu.addAction(QAction(u'净值数据', self, triggered=self.onActionFundNetValueTriggered))
         self.fundListWidgetContextMenu.addAction(QAction(u'基金持仓', self, triggered=self.onActionFundHoldDataTriggered))
 
-        self.anvTableWidget.setEnabled(False)
         self.anvTableWidget.setColumnCount(3)
         self.anvTableWidget.setHorizontalHeaderLabels(['日期', '单位净值', '累计净值'])
         self.anvTableWidget.setRowCount(0)
         self.anvTableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
-        self.actionTableWidget.setEnabled(False)
         self.actionTableWidget.setColumnCount(4)
         self.actionTableWidget.setHorizontalHeaderLabels(['日期', '交易', '数额', '标注'])
         self.actionTableWidget.setRowCount(0)
@@ -76,18 +72,23 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.actionTableWidgetContextMenu.addAction(QAction(u'卖出交易', self, triggered=self.onActionTradeSellTriggered))
         self.actionTableWidgetContextMenu.addAction(QAction(u'撤销交易', self, triggered=self.onActionTradeRevokeTriggered))
 
-    def loadFundList(self):
+        self.leftWidget.setEnabled(False)
+        self.rightWidget.setEnabled(False)
+        # self.fundListWidget.setEnabled(False)
+        # self.anvTableWidget.setEnabled(False)
+        # self.actionTableWidget.setEnabled(False)
+
+    def loadFundAccountList(self):
         '''
         加载基金列表
         '''
-        fund_list = MySQLDB.getFundList()
-        if fund_list:
+        account_list = MySQLDB.getFundAccountList()
+        if account_list:
             self.fundListWidget.clear()
-            for fund in fund_list:
-                item = QListWidgetItem(fund['code'] + ' ' + fund['name'])
-                item.setData(
-                    Qt.UserRole, {'code': fund['code'], 'name': fund['name']})
-                self.fundListWidget.addItem(item)
+            for item in account_list:
+                list_item = QListWidgetItem(item['code'] + ' ' + item['name'])
+                list_item.setData(Qt.UserRole, item)
+                self.fundListWidget.addItem(list_item)
             self.fundListWidget.setCurrentRow(0)
         else:
             self.statusBar.showMessage('没有获取到基金列表')
@@ -99,10 +100,15 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         '''
         self.actionLogin.setEnabled(not isLoggedIn)
         self.actionLogout.setEnabled(isLoggedIn)
-        self.actionSync.setEnabled(isLoggedIn)
-        self.fundListWidget.setEnabled(isLoggedIn)
-        self.anvTableWidget.setEnabled(isLoggedIn)
-        self.actionTableWidget.setEnabled(isLoggedIn)
+        self.actionCreateFundAccount.setEnabled(isLoggedIn)
+        self.actionSetupFundAccount.setEnabled(isLoggedIn)
+        self.actionSyncFundHistory.setEnabled(isLoggedIn)
+
+        # self.fundListWidget.setEnabled(isLoggedIn)
+        # self.anvTableWidget.setEnabled(isLoggedIn)
+        # self.actionTableWidget.setEnabled(isLoggedIn)
+        self.leftWidget.setEnabled(isLoggedIn)
+        self.rightWidget.setEnabled(isLoggedIn)
 
         if isLoggedIn:
             self.statusBar.showMessage(f'{self.userid} 已登录', 3000)
@@ -138,7 +144,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             self.setActionStatus(True)
 
             # 加载基金数据
-            self.loadFundList()
+            self.loadFundAccountList()
 
     def onActionLogoutTriggered(self):
         '''
@@ -147,6 +153,28 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.setWindowTitle('基金分析1.0 [未登录]')
         self.statusBar.showMessage('已注销', 3000)
         self.setActionStatus(False)
+
+    def onActionCreateFundAccountTriggered(self):
+        createFundAccountDialog = CreateFundAccountDialog(self)
+        createFundAccountDialog.exec()
+
+    def onActionDeleteFundAccountTriggered(self):
+        '''
+        删除基金账户ACTION事件
+        '''
+        if self.current_fund is None:
+            self.statusBar.showMessage('请先选择基金账户')
+            return
+        if QMessageBox.question(self, '提示', f"是否确定删除基金账户 {self.current_fund['code']} {self.current_fund['name']}？", QMessageBox.Yes | QMessageBox.No, QMessageBox.No) == QMessageBox.Yes:
+            MySQLDB.deleteFundAccount(self.current_fund['code'])
+            self.loadFundAccountList()
+            self.statusBar.showMessage(f'已删除基金账户 {self.current_fund["code"]} {self.current_fund["name"]}')
+            self.current_fund = None
+            self.fundNameLabel.setText('[未选择基金]')
+            self.anvTableWidget.clearContents()
+            self.anvTableWidget.setRowCount(0)
+            self.actionTableWidget.clearContents()
+            self.actionTableWidget.setRowCount(0)
 
     def onActionExitTriggered(self):
         '''
@@ -162,15 +190,15 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         analyzeIndexDialog = AnalyzeIndexDialog(self)
         analyzeIndexDialog.exec()
 
-    def onActionSetupFundTriggered(self):
-        setupFundDialog = SetupFundDialog(self)
-        if setupFundDialog.exec() == QDialog.Accepted:
-            self.loadFundList()
+    def onActionSetupFundAccountTriggered(self):
+        dialog = SetupFundAccountDialog(self)
+        if dialog.exec() == QDialog.Accepted:
+            self.loadFundAccountList()
 
-    def onActionSetupDataTriggered(self):
-        setupDataDialog = SetupDataDialog(self)
-        if setupDataDialog.exec() == QDialog.Accepted:
-            self.loadFundList()
+    def onActionSyncFundHistoryTriggered(self):
+        dialog = SyncFundHistoryDialog(self)
+        if dialog.exec() == QDialog.Accepted:
+            self.loadFundAccountList()
 
     def onActionAboutTriggered(self):
         aboutDialog = AboutDialog(self)
@@ -178,7 +206,6 @@ class MainWindow(QMainWindow, Ui_mainWindow):
 
     def onActionFundBasicInfoTriggered(self):
         dialog = FundBasicInfoDialog(parent=self, params=self.current_fund)
-        dialog.loadData()
         dialog.exec()
 
     def onActionFundNetValueTriggered(self):
@@ -191,10 +218,12 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         dialog.loadData()
         dialog.exec()
 
-    def onActionAccountInitTriggered(self):
-        dialog = FundAccountInitDialog(parent=self, params=self.current_fund)
+    def onActionInitFundAccountTriggered(self):
+        dialog = InitFundAccountDialog(parent=self, params=self.current_fund)
         if dialog.exec() == QDialog.Accepted:
-            self.showFundAccountData(self.current_fund["code"])
+            self.showFundHoldingData(self.current_fund["code"])
+        else:
+            self.statusBar.showMessage(f'[{self.current_fund["code"]}] {self.current_fund["name"]} 初始化基金持仓数据失败')
 
     def onActionFundListWidgetContextMenu(self, pos):
         '''
@@ -218,28 +247,40 @@ class MainWindow(QMainWindow, Ui_mainWindow):
             return
         self.current_fund['code'] = item_data['code']
         self.current_fund['name'] = item_data['name']
+        self.current_fund['basic_info'] = item_data['basic_info']
 
+        self.fundNameLabel.setText(f'{self.current_fund["name"]} [{self.current_fund['code']}]')
         self.statusBar.showMessage(f'已选择 [{self.current_fund["code"]}] {self.current_fund["name"]}')
-        self.showFundAccountData(self.current_fund["code"])
+        self.showFundHoldingData(self.current_fund["code"])
         self.showFundNetValueData(self.current_fund["code"])
         self.showFundActionData(self.current_fund["code"])
 
-    def showFundAccountData(self, code):
+    def showFundHoldingData(self, code):
         '''
-        显示基金详情
+        显示基金持仓数据
         param: code: 基金代码
         '''
         # 显示基金持仓表
-        held_data = MySQLDB.getFundAccountData(code)
-        if held_data is None:
+        data = MySQLDB.getFundLastestHoldingData(code)
+        if data is None:
+            self.fundHeldCostLabel.setText('0.00')
+            self.fundHeldSharesLabel.setText('0.00')
+            self.fundNVDateLabel.setText('N/A')
+            self.fundNetValueLabel.setText('0.0000')
+            self.fundADRatioLabel.setText('0.00%')
+            self.fundADRatioLabel.setStyleSheet('font-size:20px; font-weight:bold;')
+            self.fundTotalLabel.setText('0.00')
+            self.fundProfitLabel.setText('0.00')
+            self.fundProfitLabel.setStyleSheet('font-size:20px; font-weight:bold;')
+            self.fundProfitRatioLabel.setText('0.00%')
+            self.fundProfitRatioLabel.setStyleSheet('font-size:20px; font-weight:bold;')
             return
 
-        fund_name = held_data["name"]
-        held_cost = float(held_data["held_cost"])
-        held_shares = float(held_data["held_shares"])
-        self.fundNameLabel.setText(f'{fund_name} [{code}]')
-        self.fundHeldCostLabel.setText(f'{held_cost:,.2f}')
-        self.fundHeldSharesLabel.setText(f'{held_shares:,.2f}')
+        holding_cost = float(data["cost"])
+        holding_share = float(data["share"])
+
+        self.fundHeldCostLabel.setText(f'{holding_cost:,.2f}')
+        self.fundHeldSharesLabel.setText(f'{holding_share:,.2f}')
 
         # 显示基金最新净值
         nv_data = MySQLDB.getFundLatestNetValue(code)
@@ -249,33 +290,40 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         nv_value = float(nv_data["asset_net_value"])
         nv_growth = float(nv_data["growth_rate"])
 
+        # 显示基金最新净值日期及涨跌幅
         self.fundNVDateLabel.setText(f'{nv_date}')
         self.fundNetValueLabel.setText(f'{nv_value:,.4f}')
         if nv_growth < 0:
             self.fundADRatioLabel.setStyleSheet('font-size:20px; font-weight:bold; color: green;')
-        else:
+        elif nv_growth > 0:
             self.fundADRatioLabel.setStyleSheet('font-size:20px; font-weight:bold; color: red;')
+        else:
+            self.fundADRatioLabel.setStyleSheet('font-size:20px; font-weight:bold;')
         self.fundADRatioLabel.setText(f'{nv_growth:,.2f}%')
 
-        total_value = nv_value * held_shares
+        total_value = nv_value * holding_share
         self.fundTotalLabel.setText(f'{total_value:,.2f}')
 
-        profit_value = total_value - held_cost
+        profit_value = total_value - holding_cost
         self.fundProfitLabel.setText(f'{profit_value:,.2f}')
         if profit_value < 0:
             self.fundProfitLabel.setStyleSheet('font-size:20px; font-weight:bold; color: green;')
-        else:
+        elif profit_value > 0:
             self.fundProfitLabel.setStyleSheet('font-size:20px; font-weight:bold; color: red;')
+        else:
+            self.fundProfitLabel.setStyleSheet('font-size:20px; font-weight:bold;')
 
-        if held_cost == 0:
+        if holding_cost == 0:
             profit_ratio = 0
         else:
-            profit_ratio = profit_value / held_cost
+            profit_ratio = profit_value / holding_cost
         self.fundProfitRatioLabel.setText(f'{profit_ratio*100:,.2f}%')
         if profit_ratio < 0:
             self.fundProfitRatioLabel.setStyleSheet('font-size:20px; font-weight:bold; color: green;')
-        else:
+        elif profit_ratio > 0:
             self.fundProfitRatioLabel.setStyleSheet('font-size:20px; font-weight:bold; color: red;')
+        else:
+            self.fundProfitRatioLabel.setStyleSheet('font-size:20px; font-weight:bold;')
 
     def showFundNetValueData(self, code):
         if code is None:
@@ -316,7 +364,7 @@ class MainWindow(QMainWindow, Ui_mainWindow):
                     elif value == '卖出':
                         value = '卖出份额'
                 elif col == 2:
-                    value = format_float(value, 2)
+                    value = format_convert.decimal_to_string(value, 2)
                 table_item = QTableWidgetItem(str(value))
                 table_item.setData(Qt.UserRole, item)
                 table_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'SetupDataDialog.ui'
+## Form generated from reading UI file 'SyncFundHistoryDialog.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.10.1
 ##
@@ -20,18 +20,18 @@ from PySide6.QtWidgets import (QAbstractItemView, QApplication, QDialog, QFrame,
     QProgressBar, QPushButton, QSizePolicy, QSpacerItem,
     QVBoxLayout, QWidget)
 
-class Ui_SetupDataDialog(object):
-    def setupUi(self, SetupDataDialog):
-        if not SetupDataDialog.objectName():
-            SetupDataDialog.setObjectName(u"SetupDataDialog")
-        SetupDataDialog.resize(733, 462)
-        SetupDataDialog.setMinimumSize(QSize(0, 0))
-        SetupDataDialog.setStyleSheet(u"")
-        self.verticalLayout = QVBoxLayout(SetupDataDialog)
+class Ui_SyncFundHistoryDialog(object):
+    def setupUi(self, SyncFundHistoryDialog):
+        if not SyncFundHistoryDialog.objectName():
+            SyncFundHistoryDialog.setObjectName(u"SyncFundHistoryDialog")
+        SyncFundHistoryDialog.resize(733, 462)
+        SyncFundHistoryDialog.setMinimumSize(QSize(0, 0))
+        SyncFundHistoryDialog.setStyleSheet(u"")
+        self.verticalLayout = QVBoxLayout(SyncFundHistoryDialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.listWidget = QListWidget(SetupDataDialog)
+        self.listWidget = QListWidget(SyncFundHistoryDialog)
         self.listWidget.setObjectName(u"listWidget")
         sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -48,7 +48,7 @@ class Ui_SetupDataDialog(object):
 
         self.horizontalLayout_2.addWidget(self.listWidget)
 
-        self.frame = QFrame(SetupDataDialog)
+        self.frame = QFrame(SyncFundHistoryDialog)
         self.frame.setObjectName(u"frame")
         sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy1.setHorizontalStretch(0)
@@ -141,13 +141,13 @@ class Ui_SetupDataDialog(object):
 
         self.horizontalLayout.addItem(self.horizontalSpacer)
 
-        self.syncButton = QPushButton(SetupDataDialog)
+        self.syncButton = QPushButton(SyncFundHistoryDialog)
         self.syncButton.setObjectName(u"syncButton")
         self.syncButton.setEnabled(False)
 
         self.horizontalLayout.addWidget(self.syncButton)
 
-        self.cancelButton = QPushButton(SetupDataDialog)
+        self.cancelButton = QPushButton(SyncFundHistoryDialog)
         self.cancelButton.setObjectName(u"cancelButton")
 
         self.horizontalLayout.addWidget(self.cancelButton)
@@ -156,20 +156,20 @@ class Ui_SetupDataDialog(object):
         self.verticalLayout.addLayout(self.horizontalLayout)
 
 
-        self.retranslateUi(SetupDataDialog)
-        self.cancelButton.clicked.connect(SetupDataDialog.reject)
-        self.syncButton.clicked.connect(SetupDataDialog.onSyncButtonClicked)
-        self.listWidget.itemSelectionChanged.connect(SetupDataDialog.onItemSelectionChanged)
+        self.retranslateUi(SyncFundHistoryDialog)
+        self.cancelButton.clicked.connect(SyncFundHistoryDialog.reject)
+        self.syncButton.clicked.connect(SyncFundHistoryDialog.onSyncButtonClicked)
+        self.listWidget.itemSelectionChanged.connect(SyncFundHistoryDialog.onItemSelectionChanged)
 
-        QMetaObject.connectSlotsByName(SetupDataDialog)
+        QMetaObject.connectSlotsByName(SyncFundHistoryDialog)
     # setupUi
 
-    def retranslateUi(self, SetupDataDialog):
-        SetupDataDialog.setWindowTitle(QCoreApplication.translate("SetupDataDialog", u"\u6570\u636e\u540c\u6b65", None))
-        self.processTip1.setText(QCoreApplication.translate("SetupDataDialog", u"\u540c\u6b65\u57fa\u672c\u6570\u636e...", None))
-        self.processTip3.setText(QCoreApplication.translate("SetupDataDialog", u"\u66f4\u65b0\u5386\u53f2\u6570\u636e...", None))
-        self.processTip2.setText(QCoreApplication.translate("SetupDataDialog", u"\u66f4\u65b0\u6240\u6240\u6709\u5386\u53f2\u6570\u636e...", None))
-        self.syncButton.setText(QCoreApplication.translate("SetupDataDialog", u"\u66f4\u65b0", None))
-        self.cancelButton.setText(QCoreApplication.translate("SetupDataDialog", u"\u53d6\u6d88", None))
+    def retranslateUi(self, SyncFundHistoryDialog):
+        SyncFundHistoryDialog.setWindowTitle(QCoreApplication.translate("SyncFundHistoryDialog", u"\u540c\u6b65\u57fa\u91d1\u5386\u53f2\u6570\u636e", None))
+        self.processTip1.setText(QCoreApplication.translate("SyncFundHistoryDialog", u"\u540c\u6b65\u57fa\u672c\u6570\u636e...", None))
+        self.processTip3.setText(QCoreApplication.translate("SyncFundHistoryDialog", u"\u66f4\u65b0\u5386\u53f2\u6570\u636e...", None))
+        self.processTip2.setText(QCoreApplication.translate("SyncFundHistoryDialog", u"\u66f4\u65b0\u6240\u6240\u6709\u5386\u53f2\u6570\u636e...", None))
+        self.syncButton.setText(QCoreApplication.translate("SyncFundHistoryDialog", u"\u66f4\u65b0", None))
+        self.cancelButton.setText(QCoreApplication.translate("SyncFundHistoryDialog", u"\u53d6\u6d88", None))
     # retranslateUi
 

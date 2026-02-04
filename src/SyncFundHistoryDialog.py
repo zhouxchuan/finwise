@@ -2,15 +2,15 @@ from PySide6.QtWidgets import QDialog
 from PySide6.QtCore import Qt, Signal, QThread
 from PySide6.QtWidgets import QListWidgetItem
 from utils.mysqldb import MySQLDB
-from ui.SetupDataDialog_ui import Ui_SetupDataDialog
+from ui.SyncFundHistoryDialog_ui import Ui_SyncFundHistoryDialog
 from utils.datasource import fundDataSource
 
 
-class SetupDataDialog(QDialog, Ui_SetupDataDialog):
+class SyncFundHistoryDialog(QDialog, Ui_SyncFundHistoryDialog):
     def __init__(self, parent=None):
-        super(SetupDataDialog, self).__init__(parent)
+        super(SyncFundHistoryDialog, self).__init__(parent)
 
-        self.selectedItems = None
+        # self.selectedItems = None
         self.setupUi(self)
 
         # 从数据库中获取数据填充到listWidget
@@ -24,17 +24,17 @@ class SetupDataDialog(QDialog, Ui_SetupDataDialog):
 
     # 填充listWidget
     def fillListWidget(self):
-        fund_list = MySQLDB.getFundList()
+        fund_list = MySQLDB.getFundAccountList()
         self.listWidget.clear()
-        for row in fund_list:
-            item = QListWidgetItem(row['code'] + ' ' + row['name'])
-            item.setData(Qt.UserRole, {'code': row['code'], 'name': row['name']})
-            self.listWidget.addItem(item)
+        for item in fund_list:
+            list_item = QListWidgetItem(item['code'] + ' ' + item['name'])
+            list_item.setData(Qt.UserRole, {'code': item['code'], 'name': item['name']})
+            self.listWidget.addItem(list_item)
 
     # 当表格项选择改变时触发
     def onItemSelectionChanged(self):
-        self.selectedItems = self.listWidget.selectedItems()
-        self.syncButton.setEnabled(len(self.selectedItems) > 0)
+        # self.selectedItems = self.listWidget.selectedItems()
+        self.syncButton.setEnabled(len(self.listWidget.selectedItems()) > 0)
 
     def onSyncButtonClicked(self):
         self.listWidget.setEnabled(False)
@@ -44,7 +44,7 @@ class SetupDataDialog(QDialog, Ui_SetupDataDialog):
         self.progressBar3.setValue(0)
 
         self.processDataThread.stop()
-        self.processDataThread.setParams(self.selectedItems)
+        self.processDataThread.setParams(self.listWidget.selectedItems())
         self.processDataThread.start()
 
     def closeEvent(self, event):
@@ -110,7 +110,23 @@ class ProcessDataThread(QThread):
                 name = item.data(Qt.UserRole)['name']
                 result = fundDataSource.getFundBasic(code)
                 if result is not None:
-                    MySQLDB.setFundBasicData(result)
+                    data = {
+                        '基金代码': code,
+                        '基金名称': name,
+                        '基金全称': result.get('基金全称', '无'),
+                        '成立时间': result.get('成立时间', '无'),
+                        '最新规模': result.get('最新规模', '无'),
+                        '基金公司': result.get('基金公司', '无'),
+                        '基金经理': result.get('基金经理', '无'),
+                        '托管银行': result.get('托管银行', '无'),
+                        '基金类型': result.get('基金类型', '无'),
+                        '评级机构': result.get('评级机构', '无'),
+                        '基金评级': result.get('基金评级', '无'),
+                        '投资策略': result.get('投资策略', '无'),
+                        '投资目标': result.get('投资目标', '无'),
+                        '业绩比较基准': result.get('业绩比较基准', '无'),
+                    }
+                    MySQLDB.setFundAccountBasicInfo(code, data)
                 process1_current += 100 / selected_total
                 self.Progress1Event.emit(process1_current, '正在同步%s(%s)基本信息(%d%%)...' % (name, code, process1_current))
             self.Progress1Event.emit(100, '所有基本信息同步完成!')
