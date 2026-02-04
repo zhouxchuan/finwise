@@ -157,9 +157,9 @@ class Ui_SyncFundHistoryDialog(object):
 
 
         self.retranslateUi(SyncFundHistoryDialog)
-        self.cancelButton.clicked.connect(SyncFundHistoryDialog.reject)
         self.syncButton.clicked.connect(SyncFundHistoryDialog.onSyncButtonClicked)
         self.listWidget.itemSelectionChanged.connect(SyncFundHistoryDialog.onItemSelectionChanged)
+        self.cancelButton.clicked.connect(SyncFundHistoryDialog.onCancelButtonClicked)
 
         QMetaObject.connectSlotsByName(SyncFundHistoryDialog)
     # setupUi

@@ -14,6 +14,7 @@ import json
 
 # TS_TOKEN = '31e5536e4d0ffbfb47a74e9832fd35c711fdaa2405bec6559b62d22d'
 
+
 class DataSource:
     def __init__(self, name=__name__):
         self.__name = name
@@ -67,28 +68,30 @@ class DataSource:
         '''
         url = f"https://danjuanfunds.com/djapi/fund/{code}"
         try:
+            result = {"基金代码": code}
             with self.session.get(url, timeout=10) as response:
                 response.encoding = 'utf-8'
-                text = response.text
-                json_data = json.loads(text)["data"]
+                json_response = json.loads(response.text)
 
-            if json_data is None:
-                return None
-
-            result = {}
-            result["基金代码"] = code
-            result["基金名称"] = json_data["fd_name"]
-            result["基金全称"] = json_data["fd_full_name"]
-            result["成立时间"] = json_data["found_date"]
-            result["最新规模"] = json_data["totshare"]
-            result["基金公司"] = json_data["keeper_name"]
-            result["基金经理"] = json_data["manager_name"]
-            result["托管银行"] = json_data["trup_name"]
-            result["基金类型"] = json_data["type_desc"]
-            result["基金评级"] = json_data["rating_desc"]
-            result["投资策略"] = json_data["invest_orientation"]
-            result["投资目标"] = json_data["invest_target"]
-            result["业绩比较基准"] = json_data["performance_bench_mark"]
+            result_code = json_response.get('result_code', -1)
+            message = json_response.get("message", "")
+            data = json_response.get("data", None)
+            if result_code == 0 and data is not None:
+                result["基金名称"] = data.get("fd_name", "")
+                result["基金全称"] = data.get("fd_full_name", "")
+                result["成立时间"] = data.get("found_date", "")
+                result["最新规模"] = data.get("totshare", "")
+                result["基金公司"] = data.get("keeper_name", "")
+                result["基金经理"] = data.get("manager_name", "")
+                result["托管银行"] = data.get("trup_name", "")
+                result["基金类型"] = data.get("type_desc", "")
+                result["基金评级"] = data.get("rating_desc", "")
+                result["投资策略"] = data.get("invest_orientation", "")
+                result["投资目标"] = data.get("invest_target", "")
+                result["业绩比较基准"] = data.get("performance_bench_mark", "")
+            else:
+                result["错误信息"] = message
+            
             return result
         except requests.RequestException as e:
             print(f"getFundBasic: {e}")

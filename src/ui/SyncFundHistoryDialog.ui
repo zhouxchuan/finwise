@@ -282,30 +282,14 @@
  <resources/>
  <connections>
   <connection>
-   <sender>cancelButton</sender>
-   <signal>clicked()</signal>
-   <receiver>SyncFundHistoryDialog</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>659</x>
-     <y>458</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>710</x>
-     <y>479</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>syncButton</sender>
    <signal>clicked()</signal>
    <receiver>SyncFundHistoryDialog</receiver>
    <slot>onSyncButtonClicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>566</x>
-     <y>460</y>
+     <x>635</x>
+     <y>451</y>
     </hint>
     <hint type="destinationlabel">
      <x>710</x>
@@ -329,9 +313,26 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>cancelButton</sender>
+   <signal>clicked()</signal>
+   <receiver>SyncFundHistoryDialog</receiver>
+   <slot>onCancelButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>670</x>
+     <y>438</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>772</x>
+     <y>619</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onSyncButtonClicked()</slot>
   <slot>onItemSelectionChanged()</slot>
+  <slot>onCancelButtonClicked()</slot>
  </slots>
 </ui>

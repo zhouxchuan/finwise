@@ -47,6 +47,9 @@ class SyncFundHistoryDialog(QDialog, Ui_SyncFundHistoryDialog):
         self.processDataThread.setParams(self.listWidget.selectedItems())
         self.processDataThread.start()
 
+    def onCancelButtonClicked(self):
+        self.close()
+
     def closeEvent(self, event):
         # 窗口关闭时确保线程已停止
         self.processDataThread.stop()
@@ -88,12 +91,13 @@ class ProcessDataThread(QThread):
 
     def __init__(self):
         super(ProcessDataThread, self).__init__()
+        self.isWorking = False
 
     def setParams(self, items):
         self.items = items
 
     def stop(self):
-        self.quit()
+        self.isWorking = False
         self.wait(1000)
         if self.isRunning():
             self.terminate()
@@ -101,32 +105,21 @@ class ProcessDataThread(QThread):
 
     def run(self):
         try:
+            self.isWorking = True
             selected_total = len(self.items)
 
             # 基本信息
             process1_current = 0
             for item in self.items:
-                code = item.data(Qt.UserRole)['code']
-                name = item.data(Qt.UserRole)['name']
+                if not self.isWorking:
+                    print('基本信息同步被中断!')
+                    break
+                item_data = item.data(Qt.UserRole)
+                code = item_data['code']
+                name = item_data['name']
                 result = fundDataSource.getFundBasic(code)
-                if result is not None:
-                    data = {
-                        '基金代码': code,
-                        '基金名称': name,
-                        '基金全称': result.get('基金全称', '无'),
-                        '成立时间': result.get('成立时间', '无'),
-                        '最新规模': result.get('最新规模', '无'),
-                        '基金公司': result.get('基金公司', '无'),
-                        '基金经理': result.get('基金经理', '无'),
-                        '托管银行': result.get('托管银行', '无'),
-                        '基金类型': result.get('基金类型', '无'),
-                        '评级机构': result.get('评级机构', '无'),
-                        '基金评级': result.get('基金评级', '无'),
-                        '投资策略': result.get('投资策略', '无'),
-                        '投资目标': result.get('投资目标', '无'),
-                        '业绩比较基准': result.get('业绩比较基准', '无'),
-                    }
-                    MySQLDB.setFundAccountBasicInfo(code, data)
+                if result:
+                    MySQLDB.setFundAccountBasicInfo(code, result)
                 process1_current += 100 / selected_total
                 self.Progress1Event.emit(process1_current, '正在同步%s(%s)基本信息(%d%%)...' % (name, code, process1_current))
             self.Progress1Event.emit(100, '所有基本信息同步完成!')
@@ -134,8 +127,12 @@ class ProcessDataThread(QThread):
             # 历史数据
             process2_current = 0
             for item in self.items:
-                code = item.data(Qt.UserRole)['code']
-                name = item.data(Qt.UserRole)['name']
+                if not self.isWorking:
+                    print('历史数据同步被中断!')
+                    break
+                item_data = item.data(Qt.UserRole)
+                code = item_data['code']
+                name = item_data['name']
 
                 self.Progress2Event.emit(process2_current, '正在同步%s(%s)历史数据(%d%%)...' % (name, code, process2_current))
 
@@ -145,6 +142,9 @@ class ProcessDataThread(QThread):
                 anv_size = len(df_anv)
                 process3_current = 0
                 for index, row in df_anv.iterrows():
+                    if not self.isWorking:
+                        print('资产净值同步被中断!')
+                        break
                     MySQLDB.setFundHistoryAssetNetValues(code, row)
                     process3_current += 100 / anv_size
                     self.Progress3Event.emit(process3_current, '正在同步%s(%s)资产净值(%d%%)...' % (name, code, process3_current))
@@ -152,6 +152,9 @@ class ProcessDataThread(QThread):
                 cnv_size = len(df_cnv)
                 process3_current = 0
                 for index, row in df_cnv.iterrows():
+                    if not self.isWorking:
+                        print('累计净值同步被中断!')
+                        break
                     MySQLDB.setFundHistoryCumNetValues(code, row)
                     process3_current += 100 / cnv_size
                     self.Progress3Event.emit(process3_current, '正在同步%s(%s)累计净值(%d%%)...' % (name, code, process3_current))
@@ -164,3 +167,5 @@ class ProcessDataThread(QThread):
             self.ProgressFinishedEvent.emit()
         except Exception as e:
             print(f'ProcessDataThread运行异常：{e}')
+
+        self.isWorking = False

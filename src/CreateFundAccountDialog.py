@@ -1,8 +1,9 @@
 from ui.CreateFundAccountDialog_ui import Ui_CreateFundAccountDialog
-from PySide6.QtWidgets import QDialog, QListWidgetItem
+from PySide6.QtWidgets import QDialog, QMessageBox, QListWidgetItem
 from PySide6.QtCore import Qt, QThread, Signal
 from utils.datasource import fundDataSource
 from utils.mysqldb import MySQLDB
+
 
 class CreateFundAccountDialog(QDialog, Ui_CreateFundAccountDialog):
     def __init__(self, parent=None):
@@ -25,14 +26,15 @@ class CreateFundAccountDialog(QDialog, Ui_CreateFundAccountDialog):
         if not selected_items:
             self.msgLabel.setText('请选择基金')
             return
-        
+
         for item in selected_items:
             fund = item.data(Qt.UserRole)
-            MySQLDB.setFundItem(fund['code'], fund['name'])
-
-
-        self.statusBar.showMessage(f'已创建基金账户 {fund["code"]} {fund["name"]}')
-        self.close()
+            res = MySQLDB.addFundAccount(fund['code'], fund['name'])
+            if res > 0:
+                QMessageBox.information(self, '信息', f'已创建基金账户 {fund["code"]} {fund["name"]}')
+            else:
+                QMessageBox.warning(self, '警告', f'创建基金账户 {fund["code"]} {fund["name"]} 失败, 请检查该基金是否已存在。')
+        super().accept()
 
     def onDataReceived(self, data):
         '''

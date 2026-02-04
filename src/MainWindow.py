@@ -155,8 +155,9 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         self.setActionStatus(False)
 
     def onActionCreateFundAccountTriggered(self):
-        createFundAccountDialog = CreateFundAccountDialog(self)
-        createFundAccountDialog.exec()
+        dialog = CreateFundAccountDialog(self)
+        if dialog.exec() == QDialog.Accepted:
+            self.loadFundAccountList()
 
     def onActionDeleteFundAccountTriggered(self):
         '''
