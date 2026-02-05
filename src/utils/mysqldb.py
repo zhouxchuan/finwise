@@ -6,6 +6,8 @@ import json
 from datetime import date
 import pandas as pd
 
+from utils.utils import format_convert
+
 mysql_config = {
     'host': 'localhost',
     'port': 3306,
@@ -150,24 +152,6 @@ class MySQLDatabase:
         rowcount = self.execute_update(sql, params=params)
         return rowcount
 
-    # def getFundTradeData(self, trade_date):
-    #     sql = "SELECT `code`,`trade_date`,`trade_text` FROM `fund_trade` WHERE `trade_date`=%s ORDER BY `code`"
-    #     params = (trade_date,)
-    #     result = self.execute_query(sql, params=params)
-    #     return result
-
-    # def setFundTradeData(self, code, trade_date, trade_text):
-    #     sql = "REPLACE INTO `fund_trade` (`code`, `trade_date`, `trade_text`) VALUES (%s, %s, %s)"
-    #     params = (code, trade_date, trade_text)
-    #     rowcount = self.execute_update(sql, params=params)
-    #     return rowcount
-
-    # def removeFundTradeData(self, code, trade_date):
-    #     sql = "DELETE FROM `fund_trade` WHERE `code`=%s AND `trade_date`=%s"
-    #     params = (code, trade_date)
-    #     rowcount = self.execute_update(sql, params=params)
-    #     return rowcount
-
     def getFundHistoryData(self, code):
         sql = "SELECT * FROM fund_history WHERE code = %s"
         params = (code,)
@@ -229,33 +213,88 @@ class MySQLDatabase:
         result = self.execute_query(sql, params=params)
         return result
 
-    def setFundAccountInitData(self, code, init_cost, init_share):
-        sql = "UPDATE `fund_list` SET `held_cost`=%s, `held_shares`=%s WHERE `code`=%s"
-        params = (init_cost, init_share, code)
-        rowcount = self.execute_update(sql, params=params)
-        return rowcount
-
-    def getFundActionData(self, code):
-        sql = "SELECT `action_date`, `action_type`, `amount`, `remark` FROM `fund_action` WHERE `code` = %s ORDER BY `action_date`"
+    def getFundTradingData(self, code):
+        sql = "SELECT `trade_date`, `trade_type`, `amount`, `remark` FROM `fund_trade` WHERE `code` = %s ORDER BY `trade_date`"
         params = (code,)
         result = self.execute_query(sql, params=params)
         return result
 
-    def setFundActionData(self, code, action_date, action_type, amount):
-        sql = "REPLACE INTO `fund_action` (`code`, `action_date`, `action_type`, `amount`, `remark`) VALUES (%s, %s, %s, %s, '未执行')"
-        params = (code, action_date, action_type, amount)
+    def setFundTradingData(self, code, trade_date, trade_type, amount):
+        sql = "REPLACE INTO `fund_trade` (`code`, `trade_date`, `trade_type`, `amount`, `remark`) VALUES (%s, %s, %s, %s, '未执行')"
+        params = (code, trade_date, trade_type, amount)
         rowcount = self.execute_update(sql, params=params)
         return rowcount
 
-    def deleteFundActionData(self, code, action_date):
-        sql = "DELETE FROM `fund_action` WHERE `code` = %s AND `action_date` = %s"
-        params = (code, action_date)
+    def deleteFundTradingData(self, code, trade_date):
+        sql = "DELETE FROM `fund_trade` WHERE `code` = %s AND `trade_date` = %s"
+        params = (code, trade_date)
         rowcount = self.execute_update(sql, params=params)
         return rowcount
 
-    def initFundHoldingData(self, code, cost, share):
+    def executeFundTradingData(self, code, trade_date):
         '''
-        初始化基金持仓数据
+        执行基金买卖操作
+        :param code: 基金代码
+        :param trade_date: 交易日期
+        '''
+        sql = "SELECT `trade_type`, `amount` FROM `fund_trade` WHERE `code` = %s AND `trade_date` = %s AND `remark` = '未执行'"
+        params = (code, trade_date)
+        result = self.execute_query(sql, params=params)
+        trade_type = result[0]['trade_type'] if result else None
+        amount = result[0]['amount'] if result else None
+        if trade_type is None or amount is None:
+            return 0
+        amount = format_convert.float_to_decimal(amount, 2)
+
+        # 查询指定日期的净值
+        sql = "SELECT `asset_net_value` FROM `fund_history` WHERE `code` = %s AND `trade_date` = %s"
+        params = (code, trade_date)
+        result = self.execute_query(sql, params=params)
+        asset_net_value = result[0]['asset_net_value'] if result else None
+        if asset_net_value is None:
+            return 0
+        asset_net_value = format_convert.float_to_decimal(asset_net_value, 4)
+
+        # 查询操作前的持仓成本及持仓份额
+        sql = "SELECT `cost`, `share` FROM `fund_holding` WHERE `code` = %s ORDER BY `holding_date` DESC LIMIT 1"
+        params = (code,)
+        result = self.execute_query(sql, params=params)
+        holding_cost = result[0]['cost'] if result else None
+        holding_share = result[0]['share'] if result else None
+        if holding_cost is None or holding_share is None:
+            return 0
+        holding_cost = format_convert.float_to_decimal(holding_cost, 2)
+        holding_share = format_convert.float_to_decimal(holding_share, 2)
+
+        # 计算操作后的资产净值
+        if trade_type == '买入':
+            holding_cost = holding_cost + amount
+            holding_share = holding_share + amount / asset_net_value
+            holding_share = format_convert.float_to_decimal(holding_share, 2)
+        elif trade_type == '卖出':
+            holding_share = holding_share - amount
+            holding_cost = holding_cost - amount * asset_net_value
+            holding_cost = format_convert.float_to_decimal(holding_cost, 2)
+        else:
+            return 0
+
+        # 更新持仓成本及持仓份额
+        holding_date = date.today().strftime("%Y-%m-%d")
+        sql = "REPLACE INTO `fund_holding` (`code`, `holding_date`, `cost`, `share`) VALUES (%s, %s, %s, %s)"
+        params = (code, holding_date, holding_cost, holding_share)
+        rowcount = self.execute_update(sql, params=params)
+        if rowcount == 0:
+            return 0
+
+        # 更新操作后的资产净值
+        sql = "UPDATE `fund_trade` SET `remark` = '已执行' WHERE `code` = %s AND `trade_date` = %s"
+        params = (code, trade_date)
+        rowcount = self.execute_update(sql, params=params)
+        return rowcount
+
+    def updateFundHoldingData(self, code, cost, share):
+        '''
+        更新基金持仓数据
         :param code: 基金代码
         :param cost: 持仓成本
         :param share: 持仓份额

@@ -1,96 +1,60 @@
-from PySide6.QtWidgets import QDialog, QTableWidgetItem, QHeaderView, QMessageBox
-from PySide6.QtCore import Qt, QDate, QDateTime
+
+from PySide6.QtWidgets import QDialog
+from PySide6.QtCore import QDate
 from ui.TradeFundDialog_ui import Ui_TradeFundDialog
 from utils.mysqldb import MySQLDB
+from utils.utils import format_convert
 
 
-# -----------------------------------------------------------------------------
 class TradeFundDialog(QDialog, Ui_TradeFundDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, params=None, mode=None):
         super(TradeFundDialog, self).__init__(parent)
         self.setupUi(self)
-        # self.setWindowFlags(self.windowFlags() & Qt.WindowMaximizeButtonHint)
+        self.data = params
+        self.mode = mode
+        self.amount = 0.00
 
-        self.get_code_by_order = {}
-        self.get_order_by_code = {}
-
-        self.startDateEdit.setDate(QDate.currentDate().addDays(-15))
-        self.endDateEdit.setDate(QDate.currentDate())
-
-        self.tableWidget.setColumnCount(0)
-        self.tableWidget.setRowCount(0)
-
-    def onShowButtonClicked(self):
-        self.tableWidget.clearContents()
-
-        self.get_code_by_order.clear()
-        self.get_order_by_code.clear()
-
-        fund_ist = MySQLDB.getFundList()
-        self.tableWidget.setColumnCount(len(fund_ist))
-        for i, item in enumerate(fund_ist):
-            item_code = item['code']
-            item_order = item['order']
-            item_name = item['brief_name']
-            self.get_order_by_code[item_code] = item_order
-            self.get_code_by_order[item_order] = item_code
-            self.tableWidget.setHorizontalHeaderItem(
-                item_order, QTableWidgetItem(item_name))
-
-        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-
-        start_date = self.startDateEdit.date()
-        end_date = self.endDateEdit.date()
-        days = start_date.daysTo(end_date)
-        self.tableWidget.setRowCount(days+1)
-        for i in range(0, days+1):
-            i_date = start_date.addDays(i)
-            row_date = i_date.toString('yyyy-MM-dd')
-            self.tableWidget.setVerticalHeaderItem(
-                i, QTableWidgetItem(row_date))
-
-            print('DEBUG-%s: %s' %
-                  (i, QDateTime.currentDateTime().toString('yyyy-MM-dd hh:mm:ss:zzz'),))
-
-            # 礼拜六礼拜天不可编辑
-            week_no = i_date.dayOfWeek()
-            if week_no == 6 or week_no == 7:
-                for j in range(0, self.tableWidget.columnCount()):
-                    row_item = QTableWidgetItem()
-                    row_item.setFlags(row_item.flags() & ~(
-                        Qt.ItemIsEditable | Qt.ItemIsSelectable))
-                    self.tableWidget.setItem(i, j, row_item)
-            else:
-                trade_data = MySQLDB.getFundTradeData(row_date)
-                for item in trade_data:
-                    item_code = item['code']
-                    item_text = item['trade_text']
-
-                    # 查找基金在基金列表中的顺序
-                    item_col = self.get_order_by_code.get(item_code, None)
-                    if item_col is None:
-                        continue
-
-                    row_item = QTableWidgetItem(item_text)
-                    row_item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-                    self.tableWidget.setItem(i, item_col, row_item)
-
-        # print('DEBUG-3: %s'% QDateTime.currentDateTime().toString('yyyy-MM-dd hh:mm:ss:zzz'))
-
-    def onSaveButtonClicked(self):
-        QMessageBox.information(self, '提示', '暂时不支持保存')
-
-    def onTableCellChanged(self, row, col):
-        item = self.tableWidget.item(row, col)
-        if item is None:
-            return
-        item.setTextAlignment(Qt.AlignCenter | Qt.AlignVCenter)
-        item_code = self.get_code_by_order.get(col, None)
-        if item_code is None:
-            return
-        item_date = self.tableWidget.verticalHeaderItem(row).text()
-        item_text = item.text()
-        if item_text == '':
-            MySQLDB.removeFundTradeData(item_code, item_date)
+        self.dateEdit.setDate(QDate.currentDate())
+        if self.mode == '买入':
+            self.setWindowTitle(f"{self.data['name']} [{self.data['code']}] 买入交易")
+            self.amountLabel.setText(f"买入金额:")
+            self.amountEdit.setText(format_convert.decimal_to_string(self.amount, 2))
+        elif self.mode == '卖出':
+            self.setWindowTitle(f"{self.data['name']} [{self.data['code']}] 卖出交易")
+            self.amountLabel.setText("卖出份额:")
+            self.amountEdit.setText(format_convert.decimal_to_string(self.amount, 2))
         else:
-            MySQLDB.setFundTradeData(item_code, item_date, item_text)
+            self.setWindowTitle(f"{self.data['name']} [{self.data['code']}] 交易模式无效")
+            self.okButton.setEnabled(False)
+
+    def onAmountEditingFinished(self):
+        if self.amountEdit.text():
+            self.amount = format_convert.string_to_decimal(self.amountEdit.text())
+            if self.amount is None:
+                return
+            self.amountEdit.setText(format_convert.decimal_to_string(self.amount, 2))
+
+    def onEstimateButtonClicked(self):
+        res = MySQLDB.getFundLatestNetValue(self.data['code'])
+        if res:
+            trade_date = res['trade_date']
+            net_value = res['asset_net_value']
+            net_value = format_convert.float_to_decimal(net_value, 4)
+            if trade_date is None or net_value is None:
+                self.estimateLabel.setText("预计失败")
+                return
+
+            if self.mode == '买入':
+                share = self.amount / net_value
+                self.estimateLabel.setText(f"按{trade_date}净值{net_value}计算，份额为{format_convert.decimal_to_string(share, 2)}")
+            elif self.mode == '卖出':
+                cost = self.amount * net_value
+                self.estimateLabel.setText(f"按{trade_date}净值{net_value}计算，金额为{format_convert.decimal_to_string(cost, 2)}")
+
+    def accept(self):
+        action_date = self.dateEdit.date().toString('yyyy-MM-dd')
+        rowcount = MySQLDB.setFundTradingData(self.data['code'], action_date, self.mode, self.amount)
+        if rowcount > 0:
+            return super().accept()
+        else:
+            return super().reject()

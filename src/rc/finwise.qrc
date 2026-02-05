@@ -1,0 +1,5 @@
+<RCC>
+    <qresource lang="CHS" prefix="/images">
+        <file>logo.ico</file>
+    </qresource>
+</RCC>

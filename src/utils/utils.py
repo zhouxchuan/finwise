@@ -13,6 +13,11 @@ class format_convert:
             return None
 
     @staticmethod
+    def float_to_decimal(value, precision=2):
+        """浮点数转Decimal类型"""
+        return Decimal(f"{value:.{precision}f}")
+
+    @staticmethod
     def time_to_string(time):
         """格式化时间，返回HH:mm:ss格式"""
         return time.toString('HH:mm:ss')

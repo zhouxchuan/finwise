@@ -494,7 +494,7 @@ QGroupBox
         </widget>
        </item>
        <item>
-        <widget class="QTableWidget" name="actionTableWidget">
+        <widget class="QTableWidget" name="tradeTableWidget">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
            <horstretch>3</horstretch>
@@ -561,7 +561,7 @@ QGroupBox
     <addaction name="actionLogout"/>
     <addaction name="separator"/>
     <addaction name="actionCreateFundAccount"/>
-    <addaction name="actionSetupFundAccount"/>
+    <addaction name="actionRemoveFundAccount"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -575,13 +575,17 @@ QGroupBox
     <property name="title">
      <string>工具(&amp;T)</string>
     </property>
+    <addaction name="actionSetupFundAccount"/>
     <addaction name="actionSyncFundHistory"/>
+    <addaction name="separator"/>
+    <addaction name="actionSetupOptions"/>
    </widget>
    <widget class="QMenu" name="menu">
     <property name="title">
      <string>操作(O)</string>
     </property>
-    <addaction name="actionTradeFund"/>
+    <addaction name="actionExecuteTradeData"/>
+    <addaction name="separator"/>
     <addaction name="separator"/>
     <addaction name="actionAnalyzeIndex"/>
    </widget>
@@ -688,13 +692,13 @@ QGroupBox
     <iconset theme="QIcon::ThemeIcon::MediaPlaylistRepeat"/>
    </property>
    <property name="text">
-    <string>数据更新(&amp;R)...</string>
+    <string>更新基金数据(&amp;R)...</string>
    </property>
    <property name="iconText">
-    <string>数据更新</string>
+    <string>更新基金数据</string>
    </property>
    <property name="toolTip">
-    <string>数据更新...</string>
+    <string>更新基金数据</string>
    </property>
    <property name="shortcut">
     <string>Alt+S</string>
@@ -715,6 +719,9 @@ QGroupBox
    </property>
    <property name="toolTip">
     <string>配置基金账户</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+S</string>
    </property>
   </action>
   <action name="actionAnalyzeIndex">
@@ -762,6 +769,39 @@ QGroupBox
   <action name="actionDeleteFundAccount">
    <property name="text">
     <string>删除基金账户</string>
+   </property>
+  </action>
+  <action name="actionExecuteTradeData">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>批量处理交易数据...</string>
+   </property>
+  </action>
+  <action name="actionRemoveFundAccount">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::ListRemove"/>
+   </property>
+   <property name="text">
+    <string>删除基金账户</string>
+   </property>
+  </action>
+  <action name="actionSetupOptions">
+   <property name="text">
+    <string>设置选项(&amp;O)...</string>
+   </property>
+   <property name="iconText">
+    <string>设置选项</string>
+   </property>
+   <property name="toolTip">
+    <string>设置选项</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+O</string>
    </property>
   </action>
  </widget>
@@ -864,22 +904,6 @@ QGroupBox
    </hints>
   </connection>
   <connection>
-   <sender>actionTradeFund</sender>
-   <signal>triggered()</signal>
-   <receiver>mainWindow</receiver>
-   <slot>onActionTradeFundTriggered()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>721</x>
-     <y>512</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionAbout</sender>
    <signal>triggered()</signal>
    <receiver>mainWindow</receiver>
@@ -964,22 +988,6 @@ QGroupBox
    <signal>triggered()</signal>
    <receiver>mainWindow</receiver>
    <slot>onActionCreateFundAccountTriggered()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>625</x>
-     <y>383</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionDeleteFundAccount</sender>
-   <signal>triggered()</signal>
-   <receiver>mainWindow</receiver>
-   <slot>onActionDeleteFundAccountTriggered()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
