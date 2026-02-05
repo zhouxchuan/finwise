@@ -3,7 +3,7 @@ from PySide6.QtCore import Qt, QDateTime
 from PySide6.QtGui import QPainter, QColor, QBrush, QPen
 from PySide6.QtCharts import QChart, QValueAxis, QSplineSeries, QDateTimeAxis
 from ui.FundNetValueDialog_ui import Ui_FundNetValueDialog
-from utils.mysqldb import MySQLDB
+from utils.mysqldb import MySQLDatabase as MySQLDB
 from classes.KChartView import KChartView
 from datetime import datetime
 from dateutil.relativedelta import relativedelta

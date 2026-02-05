@@ -2,12 +2,14 @@ from PySide6.QtWidgets import QMainWindow, QDialog, QMessageBox, QSplitter, QWid
 from PySide6.QtCore import Qt, QDate
 from PySide6.QtGui import QAction
 
-from utils.mysqldb import MySQLDB
+
+from utils.mysqldb import MySQLDatabase as MySQLDB
 from ui.MainWindow_ui import Ui_mainWindow
 from LoginDialog import LoginDialog
 from CreateFundAccountDialog import CreateFundAccountDialog
 from SyncFundHistoryDialog import SyncFundHistoryDialog
 from SetupFundAccountDialog import SetupFundAccountDialog
+from SetupOptionsDialog import SetupOptionsDialog
 from AnalyzeIndexDialog import AnalyzeIndexDialog
 from AboutDialog import AboutDialog
 from FundBasicInfoDialog import FundBasicInfoDialog
@@ -202,6 +204,10 @@ class MainWindow(QMainWindow, Ui_mainWindow):
         dialog = SetupFundAccountDialog(self)
         if dialog.exec() == QDialog.Accepted:
             self.loadFundAccountList()
+
+    def onActionSetupOptionsTriggered(self):
+        dialog = SetupOptionsDialog(self)
+        dialog.exec()
 
     def onActionSyncFundHistoryTriggered(self):
         dialog = SyncFundHistoryDialog(self)

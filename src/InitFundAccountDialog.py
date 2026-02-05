@@ -2,7 +2,7 @@ from ui.InitFundAccountDialog_ui import Ui_InitFundAccountDialog
 from PySide6.QtWidgets import QDialog
 from PySide6.QtCore import QDate
 from utils.utils import format_convert
-from utils.mysqldb import MySQLDB
+from utils.mysqldb import MySQLDatabase as MySQLDB
 
 
 class InitFundAccountDialog(QDialog, Ui_InitFundAccountDialog):

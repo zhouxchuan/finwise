@@ -1015,6 +1015,22 @@ QGroupBox
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionSetupOptions</sender>
+   <signal>triggered()</signal>
+   <receiver>mainWindow</receiver>
+   <slot>onActionSetupOptionsTriggered()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>625</x>
+     <y>383</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onActionLoginTriggered()</slot>
@@ -1032,5 +1048,6 @@ QGroupBox
   <slot>onActionInitFundAccountTriggered()</slot>
   <slot>onActionCreateFundAccountTriggered()</slot>
   <slot>onActionDeleteFundAccountTriggered()</slot>
+  <slot>onActionSetupOptionsTriggered()</slot>
  </slots>
 </ui>

@@ -2,7 +2,7 @@
 from PySide6.QtWidgets import QDialog
 from PySide6.QtCore import QDate
 from ui.TradeFundDialog_ui import Ui_TradeFundDialog
-from utils.mysqldb import MySQLDB
+from utils.mysqldb import MySQLDatabase as MySQLDB
 from utils.utils import format_convert
 
 

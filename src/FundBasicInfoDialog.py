@@ -2,7 +2,6 @@ import json
 from PySide6.QtWidgets import QDialog, QHeaderView, QTableWidgetItem
 from PySide6.QtCore import Qt
 from ui.FundBasicInfoDialog_ui import Ui_FundBasicInfoDialog
-from utils.mysqldb import MySQLDB
 
 
 class FundBasicInfoDialog(QDialog, Ui_FundBasicInfoDialog):

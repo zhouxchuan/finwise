@@ -1,0 +1,9 @@
+{
+    "database": {
+        "host": "localhost",
+        "port": 3306,
+        "database": "finwise",
+        "user": "finwise",
+        "password": "123456"
+    }
+}

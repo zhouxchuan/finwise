@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QDialog
 from PySide6.QtCore import Qt, Signal, QThread
 from PySide6.QtWidgets import QListWidgetItem
-from utils.mysqldb import MySQLDB
+from utils.mysqldb import MySQLDatabase as MySQLDB
 from ui.SyncFundHistoryDialog_ui import Ui_SyncFundHistoryDialog
 from utils.datasource import fundDataSource
 

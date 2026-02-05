@@ -437,6 +437,7 @@ class Ui_mainWindow(object):
         self.fundHoldDataButton.clicked.connect(mainWindow.onActionFundHoldDataTriggered)
         self.actionCreateFundAccount.triggered.connect(mainWindow.onActionCreateFundAccountTriggered)
         self.fundAccountInitButton.clicked.connect(mainWindow.onActionInitFundAccountTriggered)
+        self.actionSetupOptions.triggered.connect(mainWindow.onActionSetupOptionsTriggered)
 
         QMetaObject.connectSlotsByName(mainWindow)
     # setupUi

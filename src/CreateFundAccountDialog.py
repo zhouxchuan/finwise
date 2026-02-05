@@ -2,7 +2,7 @@ from ui.CreateFundAccountDialog_ui import Ui_CreateFundAccountDialog
 from PySide6.QtWidgets import QDialog, QMessageBox, QListWidgetItem
 from PySide6.QtCore import Qt, QThread, Signal
 from utils.datasource import fundDataSource
-from utils.mysqldb import MySQLDB
+from utils.mysqldb import MySQLDatabase as MySQLDB
 
 
 class CreateFundAccountDialog(QDialog, Ui_CreateFundAccountDialog):
